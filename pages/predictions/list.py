@@ -35,16 +35,16 @@ def main() -> None:
                          prediction_options=prediction_options)
 
             correct_options_container = st.container()
-            cols_send_delete = st.columns(11)
-            cols_close_set_results = st.columns(5)
+            cols_send_delete = st.columns(2)
+            cols_close_set_results = st.columns(1)
             # New prediction, show send and delete buttons
             if PredictionStatus(prediction.status) is PredictionStatus.NEW:
-                cols_send_delete[2].button("Send", key=f"send{key_suffix_list}", on_click=send, args=[prediction])
-                cols_send_delete[8].button("Delete", key=f"delete{key_suffix_list}", on_click=delete, args=[prediction])
+                cols_send_delete[0].button("Send", key=f"send{key_suffix_list}", on_click=send, args=[prediction])
+                cols_send_delete[1].button("Delete", key=f"delete{key_suffix_list}", on_click=delete, args=[prediction])
 
             # Sent prediction, show close bets button
             elif PredictionStatus(prediction.status) is PredictionStatus.SENT:
-                cols_close_set_results[2].button("Close Bets", key=f"close{key_suffix_list}", on_click=close_bets,
+                cols_close_set_results[0].button("Close Bets", key=f"close{key_suffix_list}", on_click=close_bets,
                                                  args=[prediction])
 
             # Closed bets prediction, show set results button
@@ -54,7 +54,7 @@ def main() -> None:
                 correct_options_container.multiselect("Correct options", options,
                                                       key=f"correct_options{key_suffix_list}")
 
-                cols_close_set_results[2].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
+                cols_close_set_results[0].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
                                                  args=[prediction, key_suffix_list])
 
             elif PredictionStatus(prediction.status) is PredictionStatus.RESULT_SET:

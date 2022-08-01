@@ -89,12 +89,14 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, defaul
     col_2.checkbox("Allow multiple choices", key=f"multiple_choices{key_suffix}",
                    value=(True if prediction is None else prediction.allow_multiple_choices), disabled=is_sent)
 
+    col_1, col_2 = st.columns(2)
     # Schedule send
     if should_send:
         send_date = prediction.send_date if prediction is not None else datetime.now()
         col_1.date_input("Send Date", key=f"send_date{key_suffix}", value=send_date, disabled=is_sent)
         col_2.time_input("Send Time", key=f"send_time{key_suffix}", value=default_time_value, disabled=is_sent)
 
+    col_1, col_2 = st.columns(2)
     # Schedule end
     if should_end:
         end_date = prediction.end_date if prediction is not None else datetime.now()
