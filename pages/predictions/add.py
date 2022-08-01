@@ -9,7 +9,6 @@ def main() -> None:
     :return:
     """
 
-    st.subheader("Add Poll")
     key_suffix = "_add"
 
     # Get form optionals
