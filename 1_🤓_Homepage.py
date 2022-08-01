@@ -2,6 +2,7 @@ import logging
 import sys
 
 import streamlit as st
+
 import resources.Environment as Env
 
 st.set_page_config(

@@ -14,7 +14,7 @@ class Prediction(BaseModel):
     question = CharField(max_length=999, unique=True)
     send_date = DateTimeField(null=True)
     end_date = DateTimeField(null=True)
-    cutoff_date = DateTimeField(null=True)
+    cut_off_date = DateTimeField(null=True)
     refund_wager = BooleanField()
     allow_multiple_choices = BooleanField()
 

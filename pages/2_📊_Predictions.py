@@ -1,6 +1,6 @@
 import streamlit as st
-
 from streamlit_option_menu import option_menu
+
 from pages.predictions.add import main as add_main
 from pages.predictions.list import main as list_main
 

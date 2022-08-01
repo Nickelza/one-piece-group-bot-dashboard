@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import streamlit as st
 
@@ -6,7 +7,7 @@ from pages.predictions.commons import get_add_form_optionals, get_add_form, save
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus, get_all_prediction_status_names, \
-    get_active_prediction_status_names, get_prediction_status_by_list_of_names
+    get_active_prediction_status_names, get_prediction_status_by_list_of_names, get_prediction_status_name_by_key
 
 
 def main() -> None:
@@ -33,18 +34,18 @@ def main() -> None:
         key_suffix_list = f"{key_suffix}_{index}"
 
         with st.expander(prediction.question):
+            st.info(get_prediction_status_name_by_key(prediction.status))
             prediction_options = prediction.prediction_options
-            options_count, should_send, should_end, default_time_value = \
+            options_count, should_send, should_end, should_cut_off, default_time_value = \
                 get_add_form_optionals(key_suffix_list, prediction=prediction, prediction_options=prediction_options)
 
             with st.form(f"prediction_edit_form{key_suffix_list}", clear_on_submit=False):
-                get_add_form(options_count, should_send, should_end, default_time_value, key_suffix_list,
-                             prediction=prediction, prediction_options=prediction_options)
-                submitted = st.form_submit_button("Save edit")
+                get_add_form(options_count, should_send, should_end, should_cut_off, default_time_value,
+                             key_suffix_list, prediction=prediction, prediction_options=prediction_options)
+                submitted = st.form_submit_button("Save")
 
                 if submitted:
-                    save(should_send, should_end, options_count, key_suffix_list, prediction=prediction,
-                         prediction_options=prediction_options)
+                    save(options_count, key_suffix_list, prediction=prediction, prediction_options=prediction_options)
 
             correct_options_container = st.container()
             cols_send_delete = st.columns(2)
@@ -69,9 +70,6 @@ def main() -> None:
                 cols_close_set_results[0].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
                                                  args=[prediction, key_suffix_list])
 
-            elif PredictionStatus(prediction.status) is PredictionStatus.RESULT_SET:
-                st.info("Prediction closed")
-
 
 def send(prediction: Prediction) -> None:
     """
@@ -87,6 +85,7 @@ def send(prediction: Prediction) -> None:
 
     logging.info(f"Prediction {prediction.id} sent")
     prediction.status = PredictionStatus.SENT.value
+    prediction.send_date = datetime.now()
     prediction.save()
     st.success("Prediction sent")
 
@@ -103,8 +102,7 @@ def delete(prediction: Prediction) -> None:
         st.error("You can't delete a prediction that has already been sent")
         return
 
-    # FIXME remove comment
-    # prediction.delete_instance()
+    prediction.delete_instance()
     st.success("Prediction deleted")
 
 
@@ -117,6 +115,7 @@ def close_bets(prediction: Prediction) -> None:
 
     logging.info(f"Prediction {prediction.id} closed")
     prediction.status = PredictionStatus.BETS_CLOSED.value
+    prediction.end_date = datetime.now()
     prediction.save()
     st.success("Bets closed")
 

@@ -10,7 +10,7 @@ from src.model.exceptions.ValidationException import ValidationException
 
 
 def get_add_form_optionals(key_suffix: str, prediction: Prediction = None, prediction_options: list = None
-                           ) -> (int, bool, bool, datetime.time):
+                           ) -> (int, bool, bool, bool, datetime.time):
     """
     Gets the add form optionals
     :param key_suffix: Key suffix
@@ -19,14 +19,24 @@ def get_add_form_optionals(key_suffix: str, prediction: Prediction = None, predi
     :return: (options_count, should_send, should_end, default_time_value)
     """
 
-    is_sent = prediction is not None and PredictionStatus(prediction.status) >= PredictionStatus.SENT
-    is_accepting_bets = prediction is not None and PredictionStatus(prediction.status) <= PredictionStatus.BETS_CLOSED
+    prediction_status = PredictionStatus(prediction.status) if prediction is not None else None
+    is_sent = prediction is not None and prediction_status >= PredictionStatus.SENT
+    is_closed = prediction is not None and prediction_status >= PredictionStatus.BETS_CLOSED
 
     options_count = st.slider('How many options', 2, 10, key=f"options_count{key_suffix}",
                               value=(2 if prediction_options is None else len(prediction_options)),
                               disabled=is_sent)
 
-    col_1, col_2 = st.columns(2)
+    should_cut_off = False
+    # Show cut_off checkbox if prediction is sent
+    if prediction_status is not None and prediction_status is not PredictionStatus.NEW:
+        col_1, col_2, col_3 = st.columns(3)
+
+        should_cut_off = col_3.checkbox('Cut off Bets', key=f"should_cut_off{key_suffix}",
+                                        value=(False if (prediction is None or prediction.cut_off_date is None)
+                                               else True), disabled=is_closed)
+    else:
+        col_1, col_2 = st.columns(2)
 
     should_send = col_1.checkbox('Schedule send', key=f"should_send{key_suffix}",
                                  value=(False if (prediction is None or prediction.send_date is None) else True),
@@ -34,20 +44,22 @@ def get_add_form_optionals(key_suffix: str, prediction: Prediction = None, predi
 
     should_end = col_2.checkbox('Schedule end', key=f"should_end{key_suffix}",
                                 value=(False if (prediction is None or prediction.end_date is None) else True),
-                                disabled=(not is_accepting_bets))
+                                disabled=is_closed)
 
     default_time_value = datetime.strptime("11:00", '%H:%M').time()
 
-    return options_count, should_send, should_end, default_time_value
+    return options_count, should_send, should_end, should_cut_off, default_time_value
 
 
-def get_add_form(options_count: int, should_send: bool, should_end: bool, default_time_value: datetime.time,
-                 key_suffix: str, prediction: Prediction = None, prediction_options: list = None) -> None:
+def get_add_form(options_count: int, should_send: bool, should_end: bool, should_cut_off,
+                 default_time_value: datetime.time, key_suffix: str, prediction: Prediction = None,
+                 prediction_options: list = None) -> None:
     """
     Gets the prediction add form
     :param options_count: Number of options
     :param should_send: Should send
     :param should_end: Should end
+    :param should_cut_off: Should cut_off
     :param default_time_value: Default time value
     :param key_suffix: Key suffix
     :param prediction: If not None, values from the prediction are autofilled
@@ -55,8 +67,9 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, defaul
     :return: None
     """
 
-    is_sent = prediction is not None and PredictionStatus(prediction.status) >= PredictionStatus.SENT
-    is_accepting_bets = prediction is not None and PredictionStatus(prediction.status) <= PredictionStatus.BETS_CLOSED
+    prediction_status: PredictionStatus = PredictionStatus(prediction.status) if prediction is not None else None
+    is_sent = prediction is not None and prediction_status >= PredictionStatus.SENT
+    is_closed = prediction is not None and prediction_status >= PredictionStatus.BETS_CLOSED
 
     # Type
     prediction_types = [p.value for p in PredictionType]
@@ -93,24 +106,40 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, defaul
     # Schedule send
     if should_send:
         send_date = prediction.send_date if prediction is not None else datetime.now()
+        send_time = prediction.send_date if prediction is not None else default_time_value
         col_1.date_input("Send Date", key=f"send_date{key_suffix}", value=send_date, disabled=is_sent)
-        col_2.time_input("Send Time", key=f"send_time{key_suffix}", value=default_time_value, disabled=is_sent)
+        col_2.time_input("Send Time", key=f"send_time{key_suffix}", value=send_time, disabled=is_sent)
 
     col_1, col_2 = st.columns(2)
     # Schedule end
     if should_end:
         end_date = prediction.end_date if prediction is not None else datetime.now()
-        col_1.date_input("End Date", key=f"end_date{key_suffix}", value=end_date, disabled=(not is_accepting_bets))
-        col_2.time_input("End Time", key=f"end_time{key_suffix}", value=default_time_value,
-                         disabled=(not is_accepting_bets))
+        end_time = prediction.end_date if prediction is not None else default_time_value
+        col_1.date_input("End Date", key=f"end_date{key_suffix}", value=end_date, disabled=is_closed)
+        col_2.time_input("End Time", key=f"end_time{key_suffix}", value=end_time, disabled=is_closed)
+
+    col_1, col_2 = st.columns(2)
+    # Schedule cut_off
+    if should_cut_off:
+        cut_off_date = prediction.cut_off_date if prediction is not None else datetime.now()
+        cut_off_time = prediction.cut_off_date if prediction is not None else default_time_value
+        col_1.date_input("Cut off Bets Date", key=f"cut_off_date{key_suffix}", value=cut_off_date,
+                         disabled=is_closed)
+        col_2.time_input("Cut Off Bets Time", key=f"cut_off_time{key_suffix}", value=cut_off_time,
+                         disabled=is_closed)
 
 
-def validate(key_suffix: str) -> None:
+def validate(key_suffix: str, prediction: Prediction) -> None:
     """
-    Validate function. Raises an exception if form is not valid.
+    Validate function. Raises an exception if form is not valid
     :param key_suffix: Key suffix
+    :param prediction: The prediction
     :return:
     """
+
+    prediction_status: PredictionStatus = PredictionStatus(prediction.status) if prediction is not None else None
+    is_sent = prediction is not None and prediction_status >= PredictionStatus.SENT
+    is_closed = prediction is not None and prediction_status >= PredictionStatus.BETS_CLOSED
 
     if get_session_state_key("question", key_suffix) == "":
         raise ValidationException("Question is required")
@@ -121,17 +150,21 @@ def validate(key_suffix: str) -> None:
 
     should_send = get_session_state_key("should_send", key_suffix)
     should_send_datetime = None  # To silence IDE warning
+
+    # If not already sent, validate send date and time
     if should_send:
         should_send_datetime = datetime.combine(get_session_state_key("send_date", key_suffix),
                                                 get_session_state_key("send_time", key_suffix))
 
-        if get_session_state_key("send_date", key_suffix) < datetime.now().date():
-            raise ValidationException("Send date cannot be earlier than today")
+        if not is_sent:
+            if get_session_state_key("send_date", key_suffix) < datetime.now().date():
+                raise ValidationException("Send date cannot be earlier than today")
 
-        if should_send_datetime < datetime.now():
-            raise ValidationException("Send time cannot be earlier than now")
+            if should_send_datetime < datetime.now():
+                raise ValidationException("Send time cannot be earlier than now")
 
-    if get_session_state_key("should_end", key_suffix):
+    # If not already closed, validate end date and time
+    if get_session_state_key("should_end", key_suffix) and not is_closed:
         if get_session_state_key("end_date", key_suffix) < datetime.now().date():
             raise ValidationException("End date cannot be earlier than today")
 
@@ -142,6 +175,17 @@ def validate(key_suffix: str) -> None:
 
         if should_send and should_end_datetime <= should_send_datetime:
             raise ValidationException("End time must be later than send time")
+
+    # If not already closed, validate cut off date and time
+    if get_session_state_key("should_cut_off", key_suffix) and not is_closed:
+        should_cut_off_datetime = datetime.combine(get_session_state_key("cut_off_date", key_suffix),
+                                                   get_session_state_key("cut_off_time", key_suffix))
+
+        if should_cut_off_datetime > datetime.now():
+            raise ValidationException("Cut off time cannot be later than now")
+
+        if should_cut_off_datetime <= should_send_datetime:
+            raise ValidationException("Cut off time must be later than send time")
 
 
 def get_session_state_key(key: str, suffix: str) -> any:
@@ -155,12 +199,9 @@ def get_session_state_key(key: str, suffix: str) -> any:
     return st.session_state.get(f"{key}{suffix}")
 
 
-def save(should_send: bool, should_end: bool, options_count: int, key_suffix: str,
-         prediction: Prediction = None, prediction_options: list = None) -> None:
+def save(options_count: int, key_suffix: str, prediction: Prediction = None, prediction_options: list = None) -> None:
     """
     Saves the prediction
-    :param should_send: Should send
-    :param should_end: Should end
     :param options_count: Number of options
     :param key_suffix: Key suffix
     :param prediction: If not None, the prediction is updated
@@ -174,17 +215,28 @@ def save(should_send: bool, should_end: bool, options_count: int, key_suffix: st
         prediction: Prediction = Prediction()
 
     try:
-        validate(key_suffix)
+        validate(key_suffix, prediction)
         try:
+            # Type
             prediction.type = get_session_state_key("prediction_type", key_suffix)
+
+            # Question
             prediction.question = get_session_state_key("question", key_suffix)
+
+            # Scheduled send date
             prediction.send_date = datetime.combine(get_session_state_key("send_date", key_suffix),
                                                     get_session_state_key("send_time", key_suffix)) \
-                if should_send else None
+                if get_session_state_key("send_date", key_suffix) is not None else None
 
+            # Scheduled end date
             prediction.end_date = datetime.combine(get_session_state_key("end_date", key_suffix),
                                                    get_session_state_key("end_time", key_suffix)) \
-                if should_end else None
+                if get_session_state_key("end_date", key_suffix) is not None else None
+
+            # Scheduled cut_off date
+            prediction.cut_off_date = datetime.combine(get_session_state_key("cut_off_date", key_suffix),
+                                                       get_session_state_key("cut_off_time", key_suffix)) \
+                if get_session_state_key("cut_off_date", key_suffix) is not None else None
 
             prediction.refund_wager = get_session_state_key("refund_wager", key_suffix)
             prediction.allow_multiple_choices = get_session_state_key("multiple_choices", key_suffix)
@@ -215,5 +267,3 @@ def save(should_send: bool, should_end: bool, options_count: int, key_suffix: st
 
     except ValidationException as ve:
         st.error(ve.message)
-
-

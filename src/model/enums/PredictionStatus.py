@@ -16,16 +16,16 @@ PREDICTION_STATUS_NAME_MAP = {
 }
 
 
-def get_prediction_status_name(prediction_status: PredictionStatus) -> str:
+def get_prediction_status_name_by_key(prediction_status: PredictionStatus) -> str:
     return PREDICTION_STATUS_NAME_MAP[prediction_status]
 
 
 def get_all_prediction_status_names() -> list[str]:
-    return [get_prediction_status_name(status) for status in PredictionStatus]
+    return [get_prediction_status_name_by_key(status) for status in PredictionStatus]
 
 
 def get_active_prediction_status_names() -> list[str]:
-    return [get_prediction_status_name(status) for status in PredictionStatus
+    return [get_prediction_status_name_by_key(status) for status in PredictionStatus
             if status is not PredictionStatus.RESULT_SET]
 
 
