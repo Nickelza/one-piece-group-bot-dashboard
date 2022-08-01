@@ -21,15 +21,18 @@ def main() -> None:
         key_suffix_list = f"{key_suffix}_{index}"
 
         with st.expander(prediction.question):
-            options_count, should_send, should_end, default_time_value = get_add_form_optionals(key_suffix_list,
-                                                                                                prediction)
+            prediction_options = prediction.prediction_options
+            options_count, should_send, should_end, default_time_value = \
+                get_add_form_optionals(key_suffix_list, prediction=prediction, prediction_options=prediction_options)
 
             with st.form(f"prediction_edit_form{key_suffix_list}", clear_on_submit=False):
-                get_add_form(options_count, should_send, should_end, default_time_value, key_suffix_list, prediction)
+                get_add_form(options_count, should_send, should_end, default_time_value, key_suffix_list,
+                             prediction=prediction, prediction_options=prediction_options)
                 submitted = st.form_submit_button("Save edit")
 
                 if submitted:
-                    save(should_send, should_end, options_count, key_suffix_list, prediction=prediction)
+                    save(should_send, should_end, options_count, key_suffix_list, prediction=prediction,
+                         prediction_options=prediction_options)
 
             correct_options_container = st.container()
             cols_send_delete = st.columns(11)
@@ -48,7 +51,8 @@ def main() -> None:
             elif PredictionStatus(prediction.status) is PredictionStatus.BETS_CLOSED:
                 # Correct options multiselect
                 options = [o.option for o in prediction.prediction_options]
-                correct_options_container.multiselect("Correct options", options, key=f"correct_options{key_suffix_list}")
+                correct_options_container.multiselect("Correct options", options,
+                                                      key=f"correct_options{key_suffix_list}")
 
                 cols_close_set_results[2].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
                                                  args=[prediction, key_suffix_list])

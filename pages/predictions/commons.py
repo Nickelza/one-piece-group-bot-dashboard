@@ -9,11 +9,13 @@ from src.model.enums.PredictionType import PredictionType
 from src.model.exceptions.ValidationException import ValidationException
 
 
-def get_add_form_optionals(key_suffix: str, prediction: Prediction = None) -> (int, bool, bool, datetime.time):
+def get_add_form_optionals(key_suffix: str, prediction: Prediction = None, prediction_options: list = None
+                           ) -> (int, bool, bool, datetime.time):
     """
     Gets the add form optionals
     :param key_suffix: Key suffix
     :param prediction: If not None, values from the prediction are autofilled
+    :param prediction_options: If not None, values from the prediction options are autofilled
     :return: (options_count, should_send, should_end, default_time_value)
     """
 
@@ -21,7 +23,7 @@ def get_add_form_optionals(key_suffix: str, prediction: Prediction = None) -> (i
     is_accepting_bets = prediction is not None and PredictionStatus(prediction.status) <= PredictionStatus.BETS_CLOSED
 
     options_count = st.slider('How many options', 2, 10, key=f"options_count{key_suffix}",
-                              value=(2 if prediction is None else len(prediction.prediction_options)),
+                              value=(2 if prediction_options is None else len(prediction_options)),
                               disabled=is_sent)
 
     col_1, col_2 = st.columns(2)
@@ -40,7 +42,7 @@ def get_add_form_optionals(key_suffix: str, prediction: Prediction = None) -> (i
 
 
 def get_add_form(options_count: int, should_send: bool, should_end: bool, default_time_value: datetime.time,
-                 key_suffix: str, prediction: Prediction = None) -> None:
+                 key_suffix: str, prediction: Prediction = None, prediction_options: list = None) -> None:
     """
     Gets the prediction add form
     :param options_count: Number of options
@@ -49,6 +51,7 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, defaul
     :param default_time_value: Default time value
     :param key_suffix: Key suffix
     :param prediction: If not None, values from the prediction are autofilled
+    :param prediction_options: If not None, values from the prediction options are autofilled
     :return: None
     """
 
@@ -66,12 +69,12 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, defaul
 
     # Options
     for i in range(options_count):
-        option_value = prediction.prediction_options[i].option if (
-                prediction is not None and i < len(prediction.prediction_options)) else ""
+        option_value = prediction_options[i].option if (
+                prediction is not None and i < len(prediction_options)) else ""
 
         option_description = f"Option {i + 1}"
         if prediction is not None and PredictionStatus(prediction.status) is PredictionStatus.RESULT_SET:
-            prediction_option: PredictionOption = prediction.prediction_options[i]
+            prediction_option: PredictionOption = prediction_options[i]
             if prediction_option.is_correct:
                 option_description += " ✅"
         st.text_input(option_description, key=f"option_{i}{key_suffix}", value=option_value, disabled=is_sent)
@@ -151,7 +154,7 @@ def get_session_state_key(key: str, suffix: str) -> any:
 
 
 def save(should_send: bool, should_end: bool, options_count: int, key_suffix: str,
-         prediction: Prediction = None) -> None:
+         prediction: Prediction = None, prediction_options: list = None) -> None:
     """
     Saves the prediction
     :param should_send: Should send
@@ -159,6 +162,7 @@ def save(should_send: bool, should_end: bool, options_count: int, key_suffix: st
     :param options_count: Number of options
     :param key_suffix: Key suffix
     :param prediction: If not None, the prediction is updated
+    :param prediction_options: If not None, the prediction options are updated
     :return: None
     """
 
@@ -190,7 +194,7 @@ def save(should_send: bool, should_end: bool, options_count: int, key_suffix: st
             options_form = [get_session_state_key("option", f"_{i}{key_suffix}") for i in range(options_count)]
             # In case of already existing prediction, delete all options if they are different
             if not is_new:
-                options_saved = [option.option for option in prediction.prediction_options]
+                options_saved = [option.option for option in prediction_options]
                 if options_form != options_saved:
                     PredictionOption.delete().where(PredictionOption.prediction == prediction).execute()
                 else:
