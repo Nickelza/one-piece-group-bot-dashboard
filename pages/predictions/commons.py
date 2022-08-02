@@ -92,15 +92,19 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, should
                 option_description += " ✅"
         st.text_input(option_description, key=f"option_{i}{key_suffix}", value=option_value, disabled=is_sent)
 
-    col_1, col_2 = st.columns(2)
+    col_1, col_2, col_3 = st.columns(3)
 
     # Should refund berry
     col_1.checkbox("Refund wager", key=f"refund_wager{key_suffix}",
-                   value=(True if prediction is None else prediction.refund_wager), disabled=is_sent)
+                   value=(True if prediction is None else prediction.refund_wager), disabled=is_closed)
 
     # Should allow multiple choices
     col_2.checkbox("Allow multiple choices", key=f"multiple_choices{key_suffix}",
-                   value=(True if prediction is None else prediction.allow_multiple_choices), disabled=is_sent)
+                   value=(True if prediction is None else prediction.allow_multiple_choices), disabled=is_closed)
+
+    # Should allow bets withdrawal
+    col_3.checkbox("Allow bets withdrawal", key=f"can_withdraw_bet{key_suffix}",
+                   value=(True if prediction is None else prediction.can_withdraw_bet), disabled=is_closed)
 
     col_1, col_2 = st.columns(2)
     # Schedule send
@@ -240,6 +244,7 @@ def save(options_count: int, key_suffix: str, prediction: Prediction = None, pre
 
             prediction.refund_wager = get_session_state_key("refund_wager", key_suffix)
             prediction.allow_multiple_choices = get_session_state_key("multiple_choices", key_suffix)
+            prediction.can_withdraw_bet = get_session_state_key("can_withdraw_bet", key_suffix)
 
             prediction.save()
 

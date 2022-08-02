@@ -17,6 +17,7 @@ class Prediction(BaseModel):
     cut_off_date = DateTimeField(null=True)
     refund_wager = BooleanField()
     allow_multiple_choices = BooleanField()
+    can_withdraw_bet = BooleanField()
 
     class Meta:
         db_table = 'prediction'

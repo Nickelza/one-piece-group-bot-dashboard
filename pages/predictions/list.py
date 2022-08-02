@@ -47,6 +47,7 @@ def main() -> None:
 
                 if submitted:
                     save(options_count, key_suffix_list, prediction=prediction, prediction_options=prediction_options)
+                    refresh(prediction)
 
             correct_options_container = st.container()
             cols_send_delete = st.columns(2)
@@ -141,7 +142,17 @@ def set_results(prediction: Prediction, key_suffix: str) -> None:
     send_tg_rest_command(prediction, TgRestPredictionAction.SET_RESULTS, "Prediction scheduled for results set")
 
 
-def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction, success_message: str) -> None:
+def refresh(prediction: Prediction) -> None:
+    """
+    Refresh prediction function
+    :param prediction: Prediction
+    :return:
+    """
+
+    send_tg_rest_command(prediction, TgRestPredictionAction.REFRESH)
+
+
+def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction, success_message: str = None) -> None:
     """
     Send tg rest command
     :param prediction: Prediction
@@ -155,7 +166,9 @@ def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction,
 
     try:
         TgBot().send_message(tg_rest_prediction)
-        st.success(success_message)
+
+        if success_message is not None:
+            st.success(success_message)
     except TgBotRequestException as e:
         st.error(e.message)
         return
