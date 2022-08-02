@@ -74,7 +74,11 @@ class Environment:
 
 
 # Bot
-BOT_ID = Environment('BOT_ID')
+TG_REST_BOT_ID = Environment('TG_REST_BOT_ID')
+TG_REST_BOT_TOKEN = Environment('TG_REST_BOT_TOKEN')
+
+# TgRest Channel ID
+TG_REST_CHANNEL_ID = Environment('TG_REST_CHANNEL_ID')
 
 # CONFIG
 # Which timezone to use
@@ -93,3 +97,4 @@ DB_USER = Environment('DB_USER')
 DB_PASSWORD = Environment('DB_PASSWORD')
 # Log queries
 DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
+

@@ -1,6 +1,3 @@
-import logging
-from datetime import datetime
-
 import streamlit as st
 
 from pages.predictions.commons import get_add_form_optionals, get_add_form, save, get_session_state_key
@@ -8,6 +5,10 @@ from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus, get_all_prediction_status_names, \
     get_active_prediction_status_names, get_prediction_status_by_list_of_names, get_prediction_status_name_by_key
+from src.model.tgrest.TgBot import TgBot
+from src.model.tgrest.TgBotRequestException import TgBotRequestException
+from src.model.tgrest.TgRestPrediction import TgRestPrediction
+from src.model.tgrest.TgRestPredictionAction import TgRestPredictionAction
 
 
 def main() -> None:
@@ -83,11 +84,7 @@ def send(prediction: Prediction) -> None:
         st.error("This prediction has already been sent")
         return
 
-    logging.info(f"Prediction {prediction.id} sent")
-    prediction.status = PredictionStatus.SENT.value
-    prediction.send_date = datetime.now()
-    prediction.save()
-    st.success("Prediction sent")
+    send_tg_rest_command(prediction, TgRestPredictionAction.SEND, "Prediction scheduled for sending")
 
 
 def delete(prediction: Prediction) -> None:
@@ -113,11 +110,12 @@ def close_bets(prediction: Prediction) -> None:
     :return:
     """
 
-    logging.info(f"Prediction {prediction.id} closed")
-    prediction.status = PredictionStatus.BETS_CLOSED.value
-    prediction.end_date = datetime.now()
-    prediction.save()
-    st.success("Bets closed")
+    # Should never happen because close bets button would not be visible
+    if PredictionStatus(prediction.status) >= PredictionStatus.BETS_CLOSED:
+        st.error("This prediction has already been closed")
+        return
+
+    send_tg_rest_command(prediction, TgRestPredictionAction.CLOSE_BETS, "Prediction scheduled for closing")
 
 
 def set_results(prediction: Prediction, key_suffix: str) -> None:
@@ -128,7 +126,10 @@ def set_results(prediction: Prediction, key_suffix: str) -> None:
     :return:
     """
 
-    logging.info(f"Prediction {prediction.id} results set")
+    # Should never happen because set results button would not be visible
+    if PredictionStatus(prediction.status) >= PredictionStatus.RESULT_SET:
+        st.error("This prediction results have already been set")
+        return
 
     # Save correct options
     correct_options = get_session_state_key("correct_options", key_suffix)
@@ -137,7 +138,24 @@ def set_results(prediction: Prediction, key_suffix: str) -> None:
         prediction_option.is_correct = True
         prediction_option.save()
 
-    prediction.status = PredictionStatus.RESULT_SET.value
-    prediction.save()
+    send_tg_rest_command(prediction, TgRestPredictionAction.SET_RESULTS, "Prediction scheduled for results set")
 
-    st.success("Results set")
+
+def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction, success_message: str) -> None:
+    """
+    Send tg rest command
+    :param prediction: Prediction
+    :param action: TgRestPredictionAction
+    :param success_message: Success message
+    :return:
+    """
+
+    # Send command
+    tg_rest_prediction = TgRestPrediction(action, prediction.id)
+
+    try:
+        TgBot().send_message(tg_rest_prediction)
+        st.success(success_message)
+    except TgBotRequestException as e:
+        st.error(e.message)
+        return

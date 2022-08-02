@@ -9,8 +9,6 @@
 
 /.idea/
 /out/
-/environment/
-!/environment/env.example
 /one-piece-deluxe-tools.iml
-*.py
+*.pyc
 /.streamlit/secrets.toml

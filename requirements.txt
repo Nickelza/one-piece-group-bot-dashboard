@@ -2,3 +2,5 @@ streamlit~=1.11.1
 peewee~=3.15.1
 streamlit-option-menu~=0.3.2
 pymysql~=1.0.2
+requests==2.28.1
+StrEnum==0.4.8
