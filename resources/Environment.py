@@ -98,3 +98,9 @@ DB_PASSWORD = Environment('DB_PASSWORD')
 # Log queries
 DB_LOG_QUERIES = Environment('DB_LOG_QUERIES', default_value='False')
 
+# Should refund wagers default option. Default: False
+REFUND_WAGER_DEFAULT = Environment('REFUND_WAGER_DEFAULT', default_value='False')
+# Should allow users to bet on multiple choices default option. Default: True
+ALLOW_MULTIPLE_CHOICES_DEFAULT = Environment('ALLOW_MULTIPLE_CHOICES_DEFAULT', default_value='True')
+# Should allow users to withdraw their bet default option. Default: False
+CAN_WITHDRAW_BET_DEFAULT = Environment('CAN_WITHDRAW_BET_DEFAULT', default_value='False')

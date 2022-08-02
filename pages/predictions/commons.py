@@ -2,6 +2,7 @@ from datetime import datetime
 
 import streamlit as st
 
+import resources.Environment as Env
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus
@@ -96,15 +97,18 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, should
 
     # Should refund berry
     col_1.checkbox("Refund wager", key=f"refund_wager{key_suffix}",
-                   value=(True if prediction is None else prediction.refund_wager), disabled=is_closed)
+                   value=(Env.REFUND_WAGER_DEFAULT.get_bool() if prediction is None else prediction.refund_wager),
+                   disabled=is_closed)
 
     # Should allow multiple choices
     col_2.checkbox("Allow multiple choices", key=f"multiple_choices{key_suffix}",
-                   value=(True if prediction is None else prediction.allow_multiple_choices), disabled=is_closed)
+                   value=(Env.ALLOW_MULTIPLE_CHOICES_DEFAULT.get_bool() if prediction is None
+                          else prediction.allow_multiple_choices), disabled=is_closed)
 
     # Should allow bets withdrawal
     col_3.checkbox("Allow bets withdrawal", key=f"can_withdraw_bet{key_suffix}",
-                   value=(True if prediction is None else prediction.can_withdraw_bet), disabled=is_closed)
+                   value=(Env.CAN_WITHDRAW_BET_DEFAULT.get_bool() if prediction is None
+                          else prediction.can_withdraw_bet), disabled=is_closed)
 
     col_1, col_2 = st.columns(2)
     # Schedule send

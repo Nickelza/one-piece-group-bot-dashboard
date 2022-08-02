@@ -52,6 +52,7 @@ def main() -> None:
             correct_options_container = st.container()
             cols_send_delete = st.columns(2)
             cols_close_set_results = st.columns(1)
+
             # New prediction, show send and delete buttons
             if PredictionStatus(prediction.status) is PredictionStatus.NEW:
                 cols_send_delete[0].button("Send", key=f"send{key_suffix_list}", on_click=send, args=[prediction])
