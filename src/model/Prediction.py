@@ -18,6 +18,7 @@ class Prediction(BaseModel):
     refund_wager = BooleanField()
     allow_multiple_choices = BooleanField()
     can_withdraw_bet = BooleanField()
+    message_id = IntegerField(null=True)
 
     class Meta:
         db_table = 'prediction'
