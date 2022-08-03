@@ -6,9 +6,8 @@ from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus, get_all_prediction_status_names, \
     get_active_prediction_status_names, get_prediction_status_by_list_of_names, get_prediction_status_name_by_key
 from src.model.tgrest.TgBot import TgBot
-from src.model.tgrest.TgBotRequestException import TgBotRequestException
-from src.model.tgrest.TgRestPrediction import TgRestPrediction
-from src.model.tgrest.TgRestPredictionAction import TgRestPredictionAction
+from src.model.tgrest.TgBot import TgBotRequestException
+from src.model.tgrest.TgRestPrediction import TgRestPrediction, TgRestPredictionAction
 
 
 def main() -> None:

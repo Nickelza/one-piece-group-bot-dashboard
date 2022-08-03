@@ -1,6 +1,17 @@
+from strenum import StrEnum
+
 from src.model.tgrest.TgRest import TgRest
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
-from src.model.tgrest.TgRestPredictionAction import TgRestPredictionAction
+
+
+class TgRestPredictionAction(StrEnum):
+    """
+    Enum for the action of Telegram REST API request.
+    """
+    SEND = 'send'
+    REFRESH = 'refresh'
+    CLOSE_BETS = 'close_bets'
+    SET_RESULTS = 'set_results'
 
 
 class TgRestPrediction(TgRest):
