@@ -50,27 +50,30 @@ def main() -> None:
 
             correct_options_container = st.container()
             cols_send_delete = st.columns(2)
-            cols_close_set_results = st.columns(1)
+            cols_close_set_results = st.columns(2)
 
             # New prediction, show send and delete buttons
             if PredictionStatus(prediction.status) is PredictionStatus.NEW:
                 cols_send_delete[0].button("Send", key=f"send{key_suffix_list}", on_click=send, args=[prediction])
                 cols_send_delete[1].button("Delete", key=f"delete{key_suffix_list}", on_click=delete, args=[prediction])
+            else:
+                # Sent prediction, show close bets button
+                if PredictionStatus(prediction.status) is PredictionStatus.SENT:
+                    cols_close_set_results[0].button("Close Bets", key=f"close{key_suffix_list}", on_click=close_bets,
+                                                     args=[prediction])
 
-            # Sent prediction, show close bets button
-            elif PredictionStatus(prediction.status) is PredictionStatus.SENT:
-                cols_close_set_results[0].button("Close Bets", key=f"close{key_suffix_list}", on_click=close_bets,
+                # Closed bets prediction, show set results button
+                elif PredictionStatus(prediction.status) is PredictionStatus.BETS_CLOSED:
+                    # Correct options multiselect
+                    options = [o.option for o in prediction.prediction_options]
+                    correct_options_container.multiselect("Correct options", options,
+                                                          key=f"correct_options{key_suffix_list}")
+
+                    cols_close_set_results[0].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
+                                                     args=[prediction, key_suffix_list])
+
+                cols_close_set_results[1].button("Resend", key=f"delete{key_suffix_list}", on_click=resend,
                                                  args=[prediction])
-
-            # Closed bets prediction, show set results button
-            elif PredictionStatus(prediction.status) is PredictionStatus.BETS_CLOSED:
-                # Correct options multiselect
-                options = [o.option for o in prediction.prediction_options]
-                correct_options_container.multiselect("Correct options", options,
-                                                      key=f"correct_options{key_suffix_list}")
-
-                cols_close_set_results[0].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
-                                                 args=[prediction, key_suffix_list])
 
 
 def send(prediction: Prediction) -> None:
@@ -150,6 +153,16 @@ def refresh(prediction: Prediction) -> None:
     """
 
     send_tg_rest_command(prediction, TgRestPredictionAction.REFRESH)
+
+
+def resend(prediction: Prediction) -> None:
+    """
+    Resend prediction function
+    :param prediction: Prediction
+    :return:
+    """
+
+    send_tg_rest_command(prediction, TgRestPredictionAction.RESEND, "Prediction scheduled for resending")
 
 
 def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction, success_message: str = None) -> None:
