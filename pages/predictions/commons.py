@@ -113,24 +113,30 @@ def get_add_form(options_count: int, should_send: bool, should_end: bool, should
     col_1, col_2 = st.columns(2)
     # Schedule send
     if should_send:
-        send_date = prediction.send_date if prediction is not None else datetime.now()
-        send_time = prediction.send_date if prediction is not None else default_time_value
+        prediction_send_date = prediction.send_date if prediction is not None and prediction.send_date is not None \
+            else None
+        send_date = prediction_send_date if prediction_send_date is not None else datetime.now()
+        send_time = prediction_send_date if prediction_send_date is not None else default_time_value
         col_1.date_input("Send Date", key=f"send_date{key_suffix}", value=send_date, disabled=is_sent)
         col_2.time_input("Send Time", key=f"send_time{key_suffix}", value=send_time, disabled=is_sent)
 
     col_1, col_2 = st.columns(2)
     # Schedule end
     if should_end:
-        end_date = prediction.end_date if prediction is not None else datetime.now()
-        end_time = prediction.end_date if prediction is not None else default_time_value
+        prediction_end_date = prediction.end_date if prediction is not None and prediction.end_date is not None \
+            else None
+        end_date = prediction_end_date if prediction_end_date is not None else datetime.now()
+        end_time = prediction_end_date if prediction_end_date is not None else default_time_value
         col_1.date_input("End Date", key=f"end_date{key_suffix}", value=end_date, disabled=is_closed)
         col_2.time_input("End Time", key=f"end_time{key_suffix}", value=end_time, disabled=is_closed)
 
     col_1, col_2 = st.columns(2)
     # Schedule cut_off
     if should_cut_off:
-        cut_off_date = prediction.cut_off_date if prediction is not None else datetime.now()
-        cut_off_time = prediction.cut_off_date if prediction is not None else default_time_value
+        prediction_cut_off_date = prediction.cut_off_date if prediction is not None \
+                                                             and prediction.cut_off_date is not None else None
+        cut_off_date = prediction_cut_off_date if prediction_cut_off_date is not None else datetime.now()
+        cut_off_time = prediction_cut_off_date if prediction_cut_off_date is not None else default_time_value
         col_1.date_input("Cut off Bets Date", key=f"cut_off_date{key_suffix}", value=cut_off_date,
                          disabled=is_closed)
         col_2.time_input("Cut Off Bets Time", key=f"cut_off_time{key_suffix}", value=cut_off_time,
