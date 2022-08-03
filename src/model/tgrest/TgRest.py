@@ -4,6 +4,12 @@ import resources.Environment as Env
 from src.model.tgrest.TgRestObjectType import TgRestObjectType
 
 
+class TgRestException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
+
+
 class TgRest:
     """
     TgRest class is used to create a Telegram REST API request.
