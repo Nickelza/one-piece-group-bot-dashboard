@@ -64,10 +64,15 @@ def main() -> None:
 
                 # Closed bets prediction, show set results button
                 elif PredictionStatus(prediction.status) is PredictionStatus.BETS_CLOSED:
+                    # No correct option checkbox
+                    no_correct_option = correct_options_container.checkbox("No correct option",
+                                                                           key=f"no_correct_option{key_suffix_list}",
+                                                                           value=False)
                     # Correct options multiselect
                     options = [o.option for o in prediction.prediction_options]
                     correct_options_container.multiselect("Correct options", options,
-                                                          key=f"correct_options{key_suffix_list}")
+                                                          key=f"correct_options{key_suffix_list}",
+                                                          disabled=no_correct_option)
 
                     cols_close_set_results[0].button("Set Results", key=f"set{key_suffix_list}", on_click=set_results,
                                                      args=[prediction, key_suffix_list])
@@ -135,8 +140,17 @@ def set_results(prediction: Prediction, key_suffix: str) -> None:
         st.error("This prediction results have already been set")
         return
 
-    # Save correct options
     correct_options = get_session_state_key("correct_options", key_suffix)
+
+    # No options selected
+    if len(correct_options) == 0 and not get_session_state_key("no_correct_option", key_suffix):
+        st.error("You must select at least one correct option or check the 'No correct option' checkbox")
+        return
+    elif len(correct_options) > 0 and get_session_state_key("no_correct_option", key_suffix):
+        st.error("You can't select both correct options and check the 'No correct option' checkbox")
+        return
+
+    # Save correct options
     for correct_option in correct_options:
         prediction_option = prediction.prediction_options.filter(PredictionOption.option == correct_option).first()
         prediction_option.is_correct = True
