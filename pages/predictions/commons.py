@@ -273,6 +273,7 @@ def save(options_count: int, key_suffix: str, prediction: Prediction = None, pre
                 for i in range(options_count):
                     prediction_option = PredictionOption()
                     prediction_option.prediction = prediction
+                    prediction_option.number = i + 1
                     prediction_option.option = options_form[i]
                     prediction_option.save()
 
