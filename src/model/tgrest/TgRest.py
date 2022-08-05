@@ -20,7 +20,7 @@ class TgRest:
         Constructor
         :param object_type: The object type
         """
-        self.bot_id: str = Env.TG_REST_BOT_ID.get()
+        self.bot_id: str = Env.OPD_GROUP_BOT_ID.get()
         self.object_type: TgRestObjectType = object_type
 
     def get_as_json_string(self) -> str:

@@ -74,7 +74,7 @@ class Environment:
 
 
 # Bot
-TG_REST_BOT_ID = Environment('TG_REST_BOT_ID')
+OPD_GROUP_BOT_ID = Environment('OPD_GROUP_BOT_ID')
 TG_REST_BOT_TOKEN = Environment('TG_REST_BOT_TOKEN')
 
 # TgRest Channel ID
