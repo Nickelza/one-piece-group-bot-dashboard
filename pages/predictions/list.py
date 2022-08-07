@@ -46,7 +46,10 @@ def main() -> None:
 
                 if submitted:
                     save(options_count, key_suffix_list, prediction=prediction, prediction_options=prediction_options)
-                    refresh(prediction)
+
+                    # Do not refresh if not yet sent
+                    if PredictionStatus(prediction.status) >= PredictionStatus.SENT:
+                        refresh(prediction)
 
             correct_options_container = st.container()
             cols_send_delete = st.columns(2)
