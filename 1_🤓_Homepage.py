@@ -3,6 +3,7 @@ import sys
 
 import streamlit as st
 
+import constants as c
 import resources.Environment as Env
 
 st.set_page_config(
@@ -11,6 +12,9 @@ st.set_page_config(
 )
 
 st.title("Main Page")
+
+# --- HIDE STREAMLIT STYLE ---
+st.markdown(c.HIDE_ST_STYLE, unsafe_allow_html=True)
 
 if Env.DB_LOG_QUERIES.get_bool():
     # Set Peewee logger

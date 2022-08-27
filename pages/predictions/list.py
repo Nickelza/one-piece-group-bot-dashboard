@@ -5,9 +5,8 @@ from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus, get_all_prediction_status_names, \
     get_active_prediction_status_names, get_prediction_status_by_list_of_names, get_prediction_status_name_by_key
-from src.model.tgrest.TgBot import TgBot
-from src.model.tgrest.TgBot import TgBotRequestException
 from src.model.tgrest.TgRestPrediction import TgRestPrediction, TgRestPredictionAction
+from src.service.tg_rest_service import send_tg_rest
 
 
 def main() -> None:
@@ -193,12 +192,4 @@ def send_tg_rest_command(prediction: Prediction, action: TgRestPredictionAction,
 
     # Send command
     tg_rest_prediction = TgRestPrediction(action, prediction.id)
-
-    try:
-        TgBot().send_message(tg_rest_prediction)
-
-        if success_message is not None:
-            st.success(success_message)
-    except TgBotRequestException as e:
-        st.error(e.message)
-        return
+    return send_tg_rest(tg_rest_prediction, success_message)

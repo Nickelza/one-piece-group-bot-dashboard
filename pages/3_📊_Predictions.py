@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 
+import constants as c
 from pages.predictions.add import main as add_main
 from pages.predictions.list import main as list_main
 
@@ -12,16 +13,7 @@ def main():
     """
 
     st.title("Predictions")
-
-    # --- HIDE STREAMLIT STYLE ---
-    hide_st_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                header {visibility: hidden;}
-                </style>
-                """
-    st.markdown(hide_st_style, unsafe_allow_html=True)
+    st.markdown(c.HIDE_ST_STYLE, unsafe_allow_html=True)
 
     selected = option_menu(
         menu_title=None,
