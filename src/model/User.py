@@ -3,6 +3,7 @@ import datetime
 from peewee import *
 
 from src.model.BaseModel import BaseModel
+from src.model.Crew import Crew
 
 
 class User(BaseModel):
@@ -16,7 +17,6 @@ class User(BaseModel):
     tg_username = CharField(max_length=99)
     bounty = BigIntegerField(default=0)
     pending_bounty = BigIntegerField(default=0)
-    max_rank_index = SmallIntegerField(null=True)
     can_play_doc_q = BooleanField(default=True)
     can_initiate_game = BooleanField(default=True)
     bounty_poster_limit = SmallIntegerField(default=0)
@@ -25,10 +25,17 @@ class User(BaseModel):
     can_change_region = BooleanField(default=True)
     fight_immunity_end_date = DateTimeField(null=True)
     fight_cooldown_end_date = DateTimeField(null=True)
-    should_send_location_update = BooleanField(default=True)
     impel_down_release_date = DateTimeField(null=True)
     impel_down_is_permanent = BooleanField(default=False)
+    crew = ForeignKeyField(Crew, backref='crew_members', null=True)
+    crew_join_date = DateTimeField(null=True)
+    crew_role = SmallIntegerField(null=True)
+    can_create_crew = BooleanField(default=True)
+    can_join_crew = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
+    private_screen_list = CharField(max_length=99)
+    private_screen_step = SmallIntegerField()
+    private_screen_in_edit_id = IntegerField(null=True)
 
     class Meta:
         db_table = 'user'

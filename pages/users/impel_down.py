@@ -2,10 +2,13 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.model.ImpelDownLog import ImpelDownLog
 from src.model.User import User
+from src.model.enums.impel_down.ImpelDownBountyAction import ImpelDownBountyAction
+from src.model.enums.impel_down.ImpelDownSentenceType import ImpelDownSentenceType
 from src.model.exceptions.ValidationException import ValidationException
-from src.service.tg_rest_service import send_tg_rest_message, escape_valid_markdown_chars
-from src.service.time_service import get_remaining_time
+from src.model.tgrest.TgRestImpelDownNotification import TgRestImpelDownNotification
+from src.service.tg_rest_service import send_tg_rest
 
 
 def main(user: User) -> None:
@@ -26,6 +29,8 @@ def main(user: User) -> None:
         arrested_status_text = "Free"
     st.info(arrested_status_text)
 
+    # Log st
+    st.write(st.session_state)
     # Impel down status form
     with st.form(f"impel_down_form_{user.id}{key_suffix}"):
         # Sentence type  radio
@@ -36,7 +41,7 @@ def main(user: User) -> None:
         else:
             sentence_radio_index = 0
 
-        sentence_type = st.radio("Sentence", ["None", "Temporary", "Permanent"], index=sentence_radio_index,
+        sentence_type = st.radio("Sentence", [e for e in ImpelDownSentenceType], index=sentence_radio_index,
                                  key=f"sentence_radio_{user.id}{key_suffix}")
 
         # Release date and time
@@ -47,7 +52,7 @@ def main(user: User) -> None:
                                                    key=f"release_time_{user.id}{key_suffix}")
 
         # Bounty action radio
-        bounty_action = st.radio("Bounty action", ["None", "Halve", "Erase"],
+        bounty_action = st.radio("Bounty action", [e for e in ImpelDownBountyAction], index=0,
                                  key=f"bounty_action_{user.id}{key_suffix}")
 
         # Send message checkbox
@@ -60,10 +65,11 @@ def main(user: User) -> None:
         submitted = st.form_submit_button("Save")
 
         if submitted:
-            save(user, sentence_type, bounty_action, release_date, release_time, should_send_message, reason)
+            save(user, ImpelDownSentenceType(sentence_type), ImpelDownBountyAction(bounty_action), release_date,
+                 release_time, should_send_message, reason)
 
 
-def save(user: User, sentence_type: str, bounty_action: str, release_date: datetime,
+def save(user: User, sentence_type: ImpelDownSentenceType, bounty_action: ImpelDownBountyAction, release_date: datetime,
          release_time: datetime.time, should_send_message, reason) -> None:
     """
     Save impel down status
@@ -80,34 +86,50 @@ def save(user: User, sentence_type: str, bounty_action: str, release_date: datet
         # Validation
         validate(sentence_type, release_date, release_time, should_send_message, reason)
 
-        # Save
-        user.impel_down_is_permanent = sentence_type == "Permanent"
+        impel_down_log: ImpelDownLog = ImpelDownLog()
+        impel_down_log.user = user
 
-        if sentence_type == "None" or sentence_type == "Permanent":
+        # Save
+        user.impel_down_is_permanent = sentence_type is ImpelDownSentenceType.PERMANENT
+
+        impel_down_log.sentence_type = sentence_type if sentence_type is not ImpelDownSentenceType.NONE else None
+
+        if sentence_type is ImpelDownSentenceType.NONE or sentence_type is ImpelDownSentenceType.PERMANENT:
             user.impel_down_release_date = None
         else:
             user.impel_down_release_date = datetime.combine(release_date, release_time)
+            impel_down_log.release_date_time = user.impel_down_release_date
 
-        if bounty_action == "Halve":
+        impel_down_log.bounty_action = bounty_action if bounty_action is not ImpelDownBountyAction.NONE else None
+        impel_down_log.previous_bounty = user.bounty
+
+        if bounty_action is ImpelDownBountyAction.HALVE:
             user.bounty = user.bounty // 2
-        elif bounty_action == "Erase":
+        elif bounty_action is ImpelDownBountyAction.ERASE:
             user.bounty = 0
+
+        impel_down_log.new_bounty = user.bounty
+        impel_down_log.reason = reason if len(reason) > 0 else None
+
         user.save()
         st.success("Saved")
 
         # Send notification message
         if should_send_message:
-            notification_message = get_notification_message(sentence_type, datetime.combine(release_date, release_time),
-                                                            bounty_action, reason)
-            send_tg_rest_message(user, notification_message)
+            release_date_time = datetime.combine(release_date, release_time)
+            notification = TgRestImpelDownNotification(user.id, sentence_type, release_date_time, bounty_action, reason)
+            send_tg_rest(notification)
+            impel_down_log.message_sent = True
+
+        impel_down_log.save()
 
     except ValidationException as ve:
         st.error(ve)
         return
 
 
-def validate(sentence_type: str, release_date: datetime, release_time: datetime.time, should_send_message: bool,
-             reason: str) -> None:
+def validate(sentence_type: ImpelDownSentenceType, release_date: datetime, release_time: datetime.time,
+             should_send_message: bool, reason: str) -> None:
     """
     Validate impel down status
     :param sentence_type: Sentence type
@@ -119,7 +141,7 @@ def validate(sentence_type: str, release_date: datetime, release_time: datetime.
     """
 
     # If sentence is temporary, release date and time must be in the future
-    if sentence_type == "Temporary":
+    if sentence_type is ImpelDownSentenceType.TEMPORARY:
         release_date_time = datetime.combine(release_date, release_time)
         if release_date < datetime.now().date():
             raise ValidationException("Release date cannot be earlier than today")
@@ -127,47 +149,6 @@ def validate(sentence_type: str, release_date: datetime, release_time: datetime.
             raise ValidationException("Release time cannot be earlier than now")
 
     # If you should send message sentence and type is not None, reason must be set
-    if should_send_message and sentence_type != "None":
+    if should_send_message and sentence_type is not ImpelDownSentenceType.NONE:
         if reason == "":
             raise ValidationException("Reason must be set if should send message is checked")
-
-
-def get_notification_message(sentence_type: str, release_date_time: datetime, bounty_action: str, reason: str) -> str:
-    """
-    Get notification message
-    :param sentence_type: Sentence type
-    :param release_date_time: Release date and time
-    :param bounty_action: Bounty action
-    :param reason: Reason
-    :return:
-    """
-
-    if sentence_type == "None" and bounty_action == "None":
-        return "Your disciplinary action has been lifted"
-
-    text = "⛔Disciplinary action"
-
-    if reason != "":
-        text += "\n\n*Reason*: " + escape_valid_markdown_chars(reason)
-
-    text += "\n\n*Restrictions*:"
-
-    if bounty_action == "Halve":
-        text += "\n- Bounty halved"
-    elif bounty_action == "Erase":
-        text += "\n- Bounty erased"
-
-    if sentence_type == "Temporary" or sentence_type == "Permanent":
-        text += "\n- You can't acquire any new bounty"
-        text += "\n- You can't appear in the leaderboard"
-        text += "\n- You can't challenge other users or play games"
-        text += "\n- You can't bet in polls"
-
-    text += "\n\n*Duration*: "
-
-    if sentence_type == "Temporary":
-        text += get_remaining_time(release_date_time)
-    else:
-        text += "Permanent"
-
-    return text

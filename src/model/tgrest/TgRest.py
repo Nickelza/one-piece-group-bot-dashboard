@@ -29,4 +29,4 @@ class TgRest:
         :return: The request as json string
         """
 
-        return json.dumps(self.__dict__)
+        return json.dumps(self.__dict__, default=str)
