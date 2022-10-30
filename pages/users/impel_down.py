@@ -29,8 +29,6 @@ def main(user: User) -> None:
         arrested_status_text = "Free"
     st.info(arrested_status_text)
 
-    # Log st
-    st.write(st.session_state)
     # Impel down status form
     with st.form(f"impel_down_form_{user.id}{key_suffix}"):
         # Sentence type  radio
