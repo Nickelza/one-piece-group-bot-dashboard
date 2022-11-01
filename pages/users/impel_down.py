@@ -94,6 +94,9 @@ def save(user: User, sentence_type: ImpelDownSentenceType, bounty_action: ImpelD
 
         if sentence_type is ImpelDownSentenceType.NONE or sentence_type is ImpelDownSentenceType.PERMANENT:
             user.impel_down_release_date = None
+
+            if sentence_type is ImpelDownSentenceType.PERMANENT:
+                impel_down_log.is_permanent = True
         else:
             user.impel_down_release_date = datetime.combine(release_date, release_time)
             impel_down_log.release_date_time = user.impel_down_release_date
