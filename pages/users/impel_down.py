@@ -54,7 +54,8 @@ def main(user: User) -> None:
                                  key=f"bounty_action_{user.id}{key_suffix}")
 
         # Send message checkbox
-        should_send_message = st.checkbox("Send message", key=f"send_message_{user.id}{key_suffix}")
+        # should_send_message = st.checkbox("Send message", key=f"send_message_{user.id}{key_suffix}")
+        should_send_message = True  # Always send message
 
         # Reason input
         reason = st.text_input("Reason", key=f"reason_{user.id}{key_suffix}")
