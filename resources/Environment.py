@@ -104,3 +104,5 @@ REFUND_WAGER_DEFAULT = Environment('REFUND_WAGER_DEFAULT', default_value='False'
 ALLOW_MULTIPLE_CHOICES_DEFAULT = Environment('ALLOW_MULTIPLE_CHOICES_DEFAULT', default_value='True')
 # Should allow users to withdraw their bet default option. Default: False
 CAN_WITHDRAW_BET_DEFAULT = Environment('CAN_WITHDRAW_BET_DEFAULT', default_value='False')
+# Maximum refundable wager for prediction bets. Default: 100 million
+PREDICTION_BET_MAX_REFUNDABLE_WAGER = Environment('PREDICTION_BET_MAX_REFUNDABLE_WAGER', default_value='100000000')

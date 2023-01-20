@@ -201,6 +201,10 @@ def validate(key_suffix: str, prediction: Prediction) -> None:
         if should_cut_off_datetime <= should_send_datetime:
             raise ValidationException("Cut off time must be later than send time")
 
+    # Check that multiple choices are not allowed if wagers are refunded
+    if get_session_state_key("multiple_choices", key_suffix) and get_session_state_key("refund_wager", key_suffix):
+        raise ValidationException("Multiple choices are not allowed if wagers are refunded")
+
 
 def get_session_state_key(key: str, suffix: str) -> any:
     """
@@ -253,8 +257,13 @@ def save(options_count: int, key_suffix: str, prediction: Prediction = None, pre
                 if get_session_state_key("cut_off_date", key_suffix) is not None else None
 
             prediction.refund_wager = get_session_state_key("refund_wager", key_suffix)
+            if prediction.refund_wager:
+                prediction.max_refund_wager = Env.PREDICTION_BET_MAX_REFUNDABLE_WAGER.get_int()
             prediction.allow_multiple_choices = get_session_state_key("multiple_choices", key_suffix)
             prediction.can_withdraw_bet = get_session_state_key("can_withdraw_bet", key_suffix)
+
+            if prediction.refund_wager and prediction.can_withdraw_bet:
+                raise ValidationException("Cannot refund wager and allow bet withdrawal")
 
             prediction.save()
 
