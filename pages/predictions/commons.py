@@ -280,11 +280,12 @@ def save(options_count: int, key_suffix: str, prediction: Prediction = None, pre
 
             if should_save_options:
                 for i in range(options_count):
-                    prediction_option = PredictionOption()
-                    prediction_option.prediction = prediction
-                    prediction_option.number = i + 1
-                    prediction_option.option = options_form[i]
-                    prediction_option.save()
+                    if str(options_form[i]).strip() != "":
+                        prediction_option = PredictionOption()
+                        prediction_option.prediction = prediction
+                        prediction_option.number = i + 1
+                        prediction_option.option = options_form[i]
+                        prediction_option.save()
 
             st.success("Prediction saved" if is_new else "Prediction updated")
         except Exception as e:
