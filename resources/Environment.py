@@ -106,3 +106,15 @@ ALLOW_MULTIPLE_CHOICES_DEFAULT = Environment('ALLOW_MULTIPLE_CHOICES_DEFAULT', d
 CAN_WITHDRAW_BET_DEFAULT = Environment('CAN_WITHDRAW_BET_DEFAULT', default_value='False')
 # Maximum refundable wager for prediction bets. Default: 100 million
 PREDICTION_BET_MAX_REFUNDABLE_WAGER = Environment('PREDICTION_BET_MAX_REFUNDABLE_WAGER', default_value='100000000')
+
+# Devil Fruit ability minimum value. Default: 0
+DEVIL_FRUIT_ABILITY_MIN_VALUE = Environment('DEVIL_FRUIT_ABILITY_MIN_VALUE', default_value='0')
+# Devil Fruit ability maximum value. Default: 100
+DEVIL_FRUIT_ABILITY_MAX_VALUE = Environment('DEVIL_FRUIT_ABILITY_MAX_VALUE', default_value='100')
+# Devil Fruit abilities maximum sum. Default: 100
+DEVIL_FRUIT_ABILITIES_MAX_SUM = Environment('DEVIL_FRUIT_ABILITIES_MAX_SUM', default_value='100')
+# Devil Fruit abilities required sum. Default: 100
+DEVIL_FRUIT_ABILITIES_REQUIRED_SUM = Environment('DEVIL_FRUIT_ABILITIES_REQUIRED_SUM', default_value='100')
+
+# Maximum items displayed in a list. Default: 10
+MAX_ITEMS_DISPLAYED_LIST = Environment('MAX_ITEMS_DISPLAYED_LIST', default_value='10')

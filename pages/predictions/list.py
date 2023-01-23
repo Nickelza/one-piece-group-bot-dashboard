@@ -1,11 +1,12 @@
 import streamlit as st
 
-from pages.predictions.commons import get_add_form_optionals, get_add_form, save, get_session_state_key
+from pages.predictions.commons import get_add_form_optionals, get_add_form, save
 from src.model.Prediction import Prediction
 from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus, get_all_prediction_status_names, \
     get_active_prediction_status_names, get_prediction_status_by_list_of_names, get_prediction_status_name_by_key
 from src.model.tgrest.TgRestPrediction import TgRestPrediction, TgRestPredictionAction
+from src.service.form_service import get_session_state_key
 from src.service.tg_rest_service import send_tg_rest
 
 

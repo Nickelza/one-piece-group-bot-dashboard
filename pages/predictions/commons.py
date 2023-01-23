@@ -8,6 +8,7 @@ from src.model.PredictionOption import PredictionOption
 from src.model.enums.PredictionStatus import PredictionStatus
 from src.model.enums.PredictionType import PredictionType
 from src.model.exceptions.ValidationException import ValidationException
+from src.service.form_service import get_session_state_key
 
 
 def get_add_form_optionals(key_suffix: str, prediction: Prediction = None, prediction_options: list = None
@@ -204,17 +205,6 @@ def validate(key_suffix: str, prediction: Prediction) -> None:
     # Check that multiple choices are not allowed if wagers are refunded
     if get_session_state_key("multiple_choices", key_suffix) and get_session_state_key("refund_wager", key_suffix):
         raise ValidationException("Multiple choices are not allowed if wagers are refunded")
-
-
-def get_session_state_key(key: str, suffix: str) -> any:
-    """
-    Gets the session state key
-    :param key: Key
-    :param suffix: Suffix
-    :return: Session state key
-    """
-
-    return st.session_state.get(f"{key}{suffix}")
 
 
 def save(options_count: int, key_suffix: str, prediction: Prediction = None, prediction_options: list = None) -> None:
