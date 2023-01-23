@@ -10,12 +10,12 @@ from src.model.exceptions.ValidationException import ValidationException
 from src.service.form_service import get_session_state_key
 
 
-def show_add_form(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAbilityType, int]],
+def show_add_form(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityType, int],
                   devil_fruit: DevilFruit = None) -> None:
     """
     Show add form
     :param key_suffix: Key suffix
-    :param abilities_type_value_dict_list: The abilities type and their values
+    :param abilities_type_value_dict: The abilities type and their values
     :param devil_fruit: The devil fruit
     :return: None
     """
@@ -40,17 +40,16 @@ def show_add_form(key_suffix: str, abilities_type_value_dict_list: list[dict[Dev
     # Abilities - List of number inputs
     ability_min_value: int = Env.DEVIL_FRUIT_ABILITY_MIN_VALUE.get_int()
     ability_max_value: int = Env.DEVIL_FRUIT_ABILITY_MAX_VALUE.get_int()
-    for ability_type_value in abilities_type_value_dict_list:
-        for ability_type, ability_value in ability_type_value.items():
-            st.number_input(ability_type.get_description(), key=get_ability_input_key(key_suffix, ability_type),
-                            min_value=ability_min_value, max_value=ability_max_value, disabled=_is_editable,
-                            value=ability_value)
+    for ability_type, ability_value in abilities_type_value_dict.items():
+        st.number_input(ability_type.get_description(), key=get_ability_input_key(key_suffix, ability_type),
+                        min_value=ability_min_value, max_value=ability_max_value, disabled=_is_editable,
+                        value=ability_value)
 
     # Enabled checkbox - Only if list of abilities is not empty (else disabled)
     is_enabled = devil_fruit is not None and DevilFruitStatus(devil_fruit.status).is_enabled()
     can_change_is_enabled = True
 
-    if len(abilities_type_value_dict_list) == 0:
+    if len(abilities_type_value_dict) == 0:
         is_enabled = can_change_is_enabled = False
 
     if _is_editable:
@@ -59,47 +58,46 @@ def show_add_form(key_suffix: str, abilities_type_value_dict_list: list[dict[Dev
     st.checkbox("Enabled", key=f"enabled{key_suffix}", value=is_enabled, disabled=(not can_change_is_enabled))
 
 
-def show_and_get_abilities_multi_select(key_suffix: str, abilities: list[DevilFruitAbility] = None
-                                        ) -> list[dict[DevilFruitAbilityType, int]]:
+def show_and_get_abilities_multi_select(key_suffix: str, existing_abilities: list[DevilFruitAbility] = None
+                                        ) -> dict[DevilFruitAbilityType, int]:
     """
     Show and get abilities multi select
     :param key_suffix: Key suffix
-    :param abilities: The abilities
+    :param existing_abilities: The existing abilities (if any)
     :return: The abilities and their values
     """
 
     abilities_description: list[str] = []
-    if abilities is not None:
+    if existing_abilities is not None:
         abilities_description: list[str] = [DevilFruitAbilityType(ability.ability_type).get_description()
-                                            for ability in abilities]
+                                            for ability in existing_abilities]
 
     # Multi select with all abilities
     selected_abilities_description: list[str] = st.multiselect(
         "Abilities", options=DevilFruitAbilityType.get_all_description(), default=abilities_description,
-        key=f"abilities{key_suffix}", disabled=is_editable(abilities=abilities))
+        key=f"abilities{key_suffix}", disabled=is_editable(abilities=existing_abilities))
 
-    abilities_type_value_dict_list: list[dict[DevilFruitAbilityType, int]] = [{}]
+    abilities_type_value_dict: dict[DevilFruitAbilityType, int] = {}
     for ability_description in selected_abilities_description:
         ability_type: DevilFruitAbilityType = DevilFruitAbilityType.get_by_description(ability_description)
         ability_value: int = 0
 
-        if abilities is not None:
-            for ability in abilities:
+        if existing_abilities is not None:
+            for ability in existing_abilities:
                 if DevilFruitAbilityType(ability.ability_type) is ability_type:
                     ability_value = int(ability.value)
 
-        type_dict: dict[DevilFruitAbilityType, int] = {ability_type: ability_value}
-        abilities_type_value_dict_list.append(type_dict)
+        abilities_type_value_dict[ability_type] = ability_value
 
-    return abilities_type_value_dict_list
+    return abilities_type_value_dict
 
 
-def validate(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAbilityType, int]],
+def validate(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityType, int],
              ) -> tuple[DevilFruitCategory, str, str, bool, bool]:
     """
     Validate the devil fruit, raise exception if not valid
     :param key_suffix: Key suffix
-    :param abilities_type_value_dict_list: The abilities type and their values
+    :param abilities_type_value_dict: The abilities type and their values
     :return: tuple with the category, name, model, is completed and is enabled
     """
 
@@ -130,18 +128,15 @@ def validate(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFru
 
     # Validate ability not 0 and the sum of abilities not greater than max
     sum_abilities: int = 0
-    abilities_dict_list: list[dict[DevilFruitAbilityType, int]] = []
-    for ability_type_value in abilities_type_value_dict_list:
-        for ability_type, ability_value in ability_type_value.items():
-            if ability_value == 0:
-                raise ValidationException(f"Ability {ability_type.get_description()} can't be 0")
+    for ability_type, ability_value in abilities_type_value_dict.items():
+        ability_value = get_session_state_key(f'ability{ability_type}', key_suffix)
+        if ability_value == 0:
+            raise ValidationException(f"Ability {ability_type.get_description()} can't be 0")
 
-            sum_abilities += get_session_state_key(f'ability{ability_type}', key_suffix)
-            if sum_abilities > Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int():
-                raise ValidationException(
-                    f"Sum of abilities cannot be greater than {Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int()}")
-
-            abilities_dict_list.append({ability_type: ability_value})
+        sum_abilities += get_session_state_key(f'ability{ability_type}', key_suffix)
+        if sum_abilities > Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int():
+            raise ValidationException(
+                f"Sum of abilities cannot be greater than {Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int()}")
 
     # Sum of abilities of required value, consider complete and enable status
     is_completed = False
@@ -155,7 +150,7 @@ def validate(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFru
                                   f" before enabling")
 
     # Completed, check if already exists a fruit with same abilities
-    duplicate_devil_fruit: DevilFruit = get_duplicate_fruit(abilities_dict_list)
+    duplicate_devil_fruit: DevilFruit = get_duplicate_fruit(abilities_type_value_dict)
     if duplicate_devil_fruit is not None and duplicate_devil_fruit != existing_devil_fruit:
         raise ValidationException(
             f"Devil Fruit already exists with same abilities: {duplicate_devil_fruit.get_full_name()}")
@@ -195,12 +190,12 @@ def get_ability_input_key(key_suffix: str, ability_type: DevilFruitAbilityType) 
     return f"ability{ability_type}{key_suffix}"
 
 
-def save(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAbilityType, int]],
+def save(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityType, int],
          devil_fruit: DevilFruit = None) -> None:
     """
     Save the devil fruit
     :param key_suffix: Key suffix
-    :param abilities_type_value_dict_list: The abilities type value dict list
+    :param abilities_type_value_dict: The abilities type value dict list
     :param devil_fruit: Already existing devil fruit
     :return: None
     """
@@ -210,7 +205,7 @@ def save(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAb
         devil_fruit = DevilFruit()
 
     try:
-        category, name, model, is_completed, is_enabled = validate(key_suffix, abilities_type_value_dict_list)
+        category, name, model, is_completed, is_enabled = validate(key_suffix, abilities_type_value_dict)
         try:
             devil_fruit.category = category
             devil_fruit.name = name
@@ -230,16 +225,15 @@ def save(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAb
                 DevilFruitAbility.delete().where(DevilFruitAbility.devil_fruit == devil_fruit).execute()
 
             # Save the new abilities
-            for ability_type_value in abilities_type_value_dict_list:
-                for ability_type, ability_value in ability_type_value.items():
-                    ability_value = get_session_state_key(f'ability{ability_type}', key_suffix)
+            for ability_type, ability_value in abilities_type_value_dict.items():
+                ability_value = get_session_state_key(f'ability{ability_type}', key_suffix)
 
-                    # On single lines to enable IDE detection of the type
-                    devil_fruit_ability = DevilFruitAbility()
-                    devil_fruit_ability.devil_fruit = devil_fruit
-                    devil_fruit_ability.ability_type = ability_type
-                    devil_fruit_ability.value = ability_value
-                    devil_fruit_ability.save()
+                # On single lines to enable IDE detection of the type
+                devil_fruit_ability = DevilFruitAbility()
+                devil_fruit_ability.devil_fruit = devil_fruit
+                devil_fruit_ability.ability_type = ability_type
+                devil_fruit_ability.value = ability_value
+                devil_fruit_ability.save()
 
             st.success("Devil Fruit saved" if is_new else "Devil Fruit updated")
         except Exception as e:
@@ -248,10 +242,10 @@ def save(key_suffix: str, abilities_type_value_dict_list: list[dict[DevilFruitAb
         st.error(ve)
 
 
-def get_duplicate_fruit(abilities_dict_list: list[dict[DevilFruitAbilityType, int]]) -> DevilFruit | None:
+def get_duplicate_fruit(abilities_type_value_dict: dict[DevilFruitAbilityType, int]) -> DevilFruit | None:
     """
     Get the duplicate fruit
-    :param abilities_dict_list: The abilities' dict list
+    :param abilities_type_value_dict: The abilities type value dict list
     :return: The duplicate fruit or None
     """
 
@@ -263,11 +257,12 @@ def get_duplicate_fruit(abilities_dict_list: list[dict[DevilFruitAbilityType, in
     for devil_fruit in devil_fruits:
         devil_fruit_abilities: list[DevilFruitAbility] = (DevilFruitAbility.select()
                                                           .where(DevilFruitAbility.devil_fruit == devil_fruit))
-        devil_fruit_abilities_dict_list: list[dict[DevilFruitAbilityType, int]] = []
+        existing_devil_fruit_abilities_dict: dict[DevilFruitAbilityType, int] = {}
         for devil_fruit_ability in devil_fruit_abilities:
-            devil_fruit_abilities_dict_list.append({devil_fruit_ability.ability_type: devil_fruit_ability.value})
+            existing_devil_fruit_abilities_dict[DevilFruitAbilityType(devil_fruit_ability.ability_type)] = (
+                devil_fruit_ability.value)
 
-        if devil_fruit_abilities_dict_list == abilities_dict_list:
+        if existing_devil_fruit_abilities_dict == abilities_type_value_dict:
             return devil_fruit
 
     return None

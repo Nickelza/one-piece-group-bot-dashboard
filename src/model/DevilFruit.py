@@ -17,6 +17,7 @@ class DevilFruit(BaseModel):
     owner = ForeignKeyField(User, null=True, backref='devil_fruit_owners', on_delete='RESTRICT', on_update='CASCADE')
     appearance_date = DateTimeField(null=True)
     appearance_message_id = IntegerField(null=True)
+    should_show_abilities = BooleanField(default=False)
 
     class Meta:
         db_table = 'devil_fruit'

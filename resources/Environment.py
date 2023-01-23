@@ -117,4 +117,4 @@ DEVIL_FRUIT_ABILITIES_MAX_SUM = Environment('DEVIL_FRUIT_ABILITIES_MAX_SUM', def
 DEVIL_FRUIT_ABILITIES_REQUIRED_SUM = Environment('DEVIL_FRUIT_ABILITIES_REQUIRED_SUM', default_value='100')
 
 # Maximum items displayed in a list. Default: 10
-MAX_ITEMS_DISPLAYED_LIST = Environment('MAX_ITEMS_DISPLAYED_LIST', default_value='10')
+MAX_ITEMS_DISPLAYED_LIST = Environment('MAX_ITEMS_DISPLAYED_LIST', default_value='5')
