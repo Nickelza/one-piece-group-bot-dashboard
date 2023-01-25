@@ -20,7 +20,7 @@ def show_add_form(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbi
     :return: None
     """
 
-    # Can't be edited once enqueued for release
+    # Can't be edited once scheduled for release
     _is_editable: bool = is_editable(devil_fruit)
 
     # Category
@@ -150,10 +150,11 @@ def validate(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityT
                                   f" before enabling")
 
     # Completed, check if already exists a fruit with same abilities
-    duplicate_devil_fruit: DevilFruit = get_duplicate_fruit(abilities_type_value_dict)
-    if duplicate_devil_fruit is not None and duplicate_devil_fruit != existing_devil_fruit:
-        raise ValidationException(
-            f"Devil Fruit already exists with same abilities: {duplicate_devil_fruit.get_full_name()}")
+    if len(abilities_type_value_dict) > 0:
+        duplicate_devil_fruit: DevilFruit = get_duplicate_fruit(abilities_type_value_dict)
+        if duplicate_devil_fruit is not None and duplicate_devil_fruit != existing_devil_fruit:
+            raise ValidationException(
+                f"Devil Fruit already exists with same abilities: {duplicate_devil_fruit.get_full_name()}")
 
     return category, name, model, is_completed, is_enabled
 
@@ -280,4 +281,4 @@ def is_editable(devil_fruit: DevilFruit = None, abilities: list[DevilFruitAbilit
         devil_fruit: DevilFruit = abilities[0].devil_fruit
 
     return devil_fruit is not None and DevilFruitStatus(devil_fruit.status) in [
-        DevilFruitStatus.ENQUEUED, DevilFruitStatus.RELEASED, DevilFruitStatus.COLLECTED, DevilFruitStatus.EATEN]
+        DevilFruitStatus.SCHEDULED, DevilFruitStatus.RELEASED, DevilFruitStatus.COLLECTED, DevilFruitStatus.EATEN]

@@ -7,10 +7,10 @@ class DevilFruitAbilityType(IntEnum):
     """
 
     DOC_Q_COOLDOWN_DURATION = 1
-    FIGHT_COOLDOWN_DURATION = 2
-    FIGHT_IMMUNITY_DURATION = 3
-    FIGHT_DEFENSE_BOOST = 4
-    CHALLENGE_COOLDOWN_DURATION = 5
+    GAME_COOLDOWN_DURATION = 2
+    FIGHT_COOLDOWN_DURATION = 3
+    FIGHT_IMMUNITY_DURATION = 4
+    FIGHT_DEFENSE_BOOST = 5
     PREDICTION_WAGER_REFUND = 6
     GIFT_TAX = 7
 
@@ -28,10 +28,10 @@ class DevilFruitAbilityType(IntEnum):
         :return: All the descriptions of the devil fruit ability types
         """
         return [DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION.get_description(),
+                DevilFruitAbilityType.GAME_COOLDOWN_DURATION.get_description(),
                 DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION.get_description(),
                 DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION.get_description(),
                 DevilFruitAbilityType.FIGHT_DEFENSE_BOOST.get_description(),
-                DevilFruitAbilityType.CHALLENGE_COOLDOWN_DURATION.get_description(),
                 DevilFruitAbilityType.PREDICTION_WAGER_REFUND.get_description(),
                 DevilFruitAbilityType.GIFT_TAX.get_description()]
 
@@ -51,10 +51,10 @@ class DevilFruitAbilityType(IntEnum):
 
 DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {
     DevilFruitAbilityType.DOC_Q_COOLDOWN_DURATION: "Doc Q Cooldown Duration",
+    DevilFruitAbilityType.GAME_COOLDOWN_DURATION: "Challenge Cooldown Duration",
     DevilFruitAbilityType.FIGHT_COOLDOWN_DURATION: "Fight Cooldown Duration",
     DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION: "Fight Immunity Duration",
     DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: "Fight Defense Boost",
-    DevilFruitAbilityType.CHALLENGE_COOLDOWN_DURATION: "Challenge Cooldown Duration",
     DevilFruitAbilityType.PREDICTION_WAGER_REFUND: "Prediction Wager Refund",
     DevilFruitAbilityType.GIFT_TAX: "Gift Tax"
 }

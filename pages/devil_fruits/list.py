@@ -58,43 +58,54 @@ def main() -> None:
                 if submitted:
                     save(key_suffix_list, abilities_type_value_dict, devil_fruit=devil_fruit)
 
-            # Award to user section
-            # Show if status is completed or enabled
-            if status in [DevilFruitStatus.COMPLETED, DevilFruitStatus.ENABLED]:
-                st.subheader("Award to user")
+            # Show if status is new, completed or enabled
+            if status in [DevilFruitStatus.NEW, DevilFruitStatus.COMPLETED, DevilFruitStatus.ENABLED]:
+                # Award to user section
+                if status in [DevilFruitStatus.COMPLETED, DevilFruitStatus.ENABLED]:
+                    st.subheader("Award to user")
 
-                # Filter input box
-                filter_user_by = st.text_input(label="Search", key=f"filter_user_by{key_suffix_list}")
+                    # Filter input box
+                    filter_user_by = st.text_input(label="Search", key=f"filter_user_by{key_suffix_list}")
 
-                users: list[User] = []
-                if len(filter_user_by) > 1:
-                    users: list[User] = get_users_by_string_filter(filter_user_by)
+                    users: list[User] = []
+                    if len(filter_user_by) > 1:
+                        users: list[User] = get_users_by_string_filter(filter_user_by)
 
-                # Map users to display name
-                users_display_name_map: list[tuple[str, User]] = [(
-                    get_user_display_name(user, add_user_id=True), user) for user in users]
+                    # Map users to display name
+                    users_display_name_map: list[tuple[str, User]] = [(
+                        get_user_display_name(user, add_user_id=True), user) for user in users]
 
-                # Select box with users
-                display_name_list = [display_name for display_name, _ in users_display_name_map]
-                selected_user_display_name: str = st.selectbox(
-                    "Select user", display_name_list, key=f"select_user{key_suffix_list}", index=0,
-                    disabled=(len(display_name_list) == 0))
+                    # Select box with users
+                    display_name_list = [display_name for display_name, _ in users_display_name_map]
+                    selected_user_display_name: str = st.selectbox(
+                        "Select user", display_name_list, key=f"select_user{key_suffix_list}", index=0,
+                        disabled=(len(display_name_list) == 0))
 
-                # Reason input box
-                reason: str = st.text_input(label="Reason", key=f"reason{key_suffix_list}")
+                    # Reason input box
+                    reason: str = st.text_input(label="Reason", key=f"reason{key_suffix_list}")
 
-                # Award button
-                if st.button("Award", disabled=(selected_user_display_name is None)):
-                    # Get user from display name
-                    selected_user: User = next(
-                        user for display_name, user in users_display_name_map
-                        if display_name == selected_user_display_name)
+                    # Award button
+                    if st.button("Award", key=f"award{key_suffix_list}", disabled=(selected_user_display_name is None)):
+                        # Get user from display name
+                        selected_user: User = next(
+                            user for display_name, user in users_display_name_map
+                            if display_name == selected_user_display_name)
 
-                    # Reason is required
-                    if len(reason) == 0:
-                        st.error("Reason is required")
+                        # Reason is required
+                        if len(reason) == 0:
+                            st.error("Reason is required")
+                        else:
+                            tg_rest_message = TgRestDevilFruitAward(selected_user.id, devil_fruit.id, reason)
+                            send_tg_rest(tg_rest_message)
+
+                            st.success("Devil fruit awarded, refresh the page")
+
+                # Delete button
+                st.subheader("Delete")
+                if st.button("Delete", key=f"delete{key_suffix_list}"):
+                    # Recheck status
+                    if status not in [DevilFruitStatus.NEW, DevilFruitStatus.COMPLETED, DevilFruitStatus.ENABLED]:
+                        st.error("Devil fruit is not in NEW, COMPLETED or ENABLED status")
                     else:
-                        tg_rest_message = TgRestDevilFruitAward(selected_user.id, devil_fruit.id, reason)
-                        send_tg_rest(tg_rest_message)
-
-                        st.success("Devil fruit awarded")
+                        devil_fruit.delete_instance()
+                        st.success("Devil fruit deleted, refresh the page")

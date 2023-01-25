@@ -15,8 +15,11 @@ class DevilFruit(BaseModel):
     model = CharField(max_length=50, null=True, unique=True)
     status = SmallIntegerField(default=DevilFruitStatus.NEW)
     owner = ForeignKeyField(User, null=True, backref='devil_fruit_owners', on_delete='RESTRICT', on_update='CASCADE')
-    appearance_date = DateTimeField(null=True)
-    appearance_message_id = IntegerField(null=True)
+    collection_date = DateTimeField(null=True)
+    eaten_date = DateTimeField(null=True)
+    expiration_date = DateTimeField(null=True)
+    release_date = DateTimeField(null=True)
+    release_message_id = IntegerField(null=True)
     should_show_abilities = BooleanField(default=False)
 
     class Meta:

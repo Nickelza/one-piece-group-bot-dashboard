@@ -96,7 +96,7 @@ def send(prediction: Prediction) -> None:
         st.error("This prediction has already been sent")
         return
 
-    send_tg_rest_command(prediction, TgRestPredictionAction.SEND, "Prediction scheduled for sending")
+    send_tg_rest_command(prediction, TgRestPredictionAction.SEND, "Prediction scheduled for sending, refresh the page")
 
 
 def delete(prediction: Prediction) -> None:
@@ -112,7 +112,7 @@ def delete(prediction: Prediction) -> None:
         return
 
     prediction.delete_instance()
-    st.success("Prediction deleted")
+    st.success("Prediction deleted, refresh the page")
 
 
 def close_bets(prediction: Prediction) -> None:
@@ -127,7 +127,8 @@ def close_bets(prediction: Prediction) -> None:
         st.error("This prediction has already been closed")
         return
 
-    send_tg_rest_command(prediction, TgRestPredictionAction.CLOSE_BETS, "Prediction scheduled for closing")
+    send_tg_rest_command(prediction, TgRestPredictionAction.CLOSE_BETS,
+                         "Prediction scheduled for closing, refresh the page")
 
 
 def set_results(prediction: Prediction, key_suffix: str) -> None:
@@ -159,7 +160,8 @@ def set_results(prediction: Prediction, key_suffix: str) -> None:
         prediction_option.is_correct = True
         prediction_option.save()
 
-    send_tg_rest_command(prediction, TgRestPredictionAction.SET_RESULTS, "Prediction scheduled for results set")
+    send_tg_rest_command(prediction, TgRestPredictionAction.SET_RESULTS,
+                         "Prediction scheduled for results set, refresh the page")
 
 
 def refresh(prediction: Prediction) -> None:
