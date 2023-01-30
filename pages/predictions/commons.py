@@ -252,9 +252,6 @@ def save(options_count: int, key_suffix: str, prediction: Prediction = None, pre
             prediction.allow_multiple_choices = get_session_state_key("multiple_choices", key_suffix)
             prediction.can_withdraw_bet = get_session_state_key("can_withdraw_bet", key_suffix)
 
-            if prediction.refund_wager and prediction.can_withdraw_bet:
-                raise ValidationException("Cannot refund wager and allow bet withdrawal")
-
             prediction.save()
 
             # Save options
