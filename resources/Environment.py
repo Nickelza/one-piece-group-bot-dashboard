@@ -111,10 +111,12 @@ PREDICTION_BET_MAX_REFUNDABLE_WAGER = Environment('PREDICTION_BET_MAX_REFUNDABLE
 DEVIL_FRUIT_ABILITY_MIN_VALUE = Environment('DEVIL_FRUIT_ABILITY_MIN_VALUE', default_value='0')
 # Devil Fruit ability maximum value. Default: 100
 DEVIL_FRUIT_ABILITY_MAX_VALUE = Environment('DEVIL_FRUIT_ABILITY_MAX_VALUE', default_value='100')
-# Devil Fruit abilities maximum sum. Default: 100
-DEVIL_FRUIT_ABILITIES_MAX_SUM = Environment('DEVIL_FRUIT_ABILITIES_MAX_SUM', default_value='100')
-# Devil Fruit abilities required sum. Default: 100
-DEVIL_FRUIT_ABILITIES_REQUIRED_SUM = Environment('DEVIL_FRUIT_ABILITIES_REQUIRED_SUM', default_value='100')
+# Devil Fruit Zoan abilities sum. Default: 100
+DEVIL_FRUIT_CATEGORY_ZOAN_SUM = Environment('DEVIL_FRUIT_CATEGORY_ZOAN_SUM', default_value='100')
+# Devil Fruit Ancient Zoan abilities sum. Default: 150
+DEVIL_FRUIT_CATEGORY_ANCIENT_ZOAN_SUM = Environment('DEVIL_FRUIT_CATEGORY_ANCIENT_ZOAN_SUM', default_value='150')
+# Devil Fruit Mythical Zoan abilities sum. Default: 300
+DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM = Environment('DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM', default_value='300')
 
 # Maximum items displayed in a list. Default: 10
 MAX_ITEMS_DISPLAYED_LIST = Environment('MAX_ITEMS_DISPLAYED_LIST', default_value='5')

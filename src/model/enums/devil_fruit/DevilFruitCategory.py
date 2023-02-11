@@ -1,13 +1,15 @@
 from enum import IntEnum
 
+import resources.Environment as Env
+
 
 class DevilFruitCategory(IntEnum):
     """
     Enum for the category of a devil fruit
     """
-    LOGIA = 1
-    PARAMECIA = 2
     ZOAN = 3
+    ANCIENT_ZOAN = 4
+    MYTHICAL_ZOAN = 5
 
     def get_description(self) -> str:
         """
@@ -38,9 +40,10 @@ class DevilFruitCategory(IntEnum):
         :return: All the descriptions of the devil fruit categories
         """
 
-        return [DevilFruitCategory.LOGIA.get_description(),
-                DevilFruitCategory.PARAMECIA.get_description(),
-                DevilFruitCategory.ZOAN.get_description()]
+        # Excluding Logia and Paramecia
+        return [DevilFruitCategory.ZOAN.get_description(),
+                DevilFruitCategory.ANCIENT_ZOAN.get_description(),
+                DevilFruitCategory.MYTHICAL_ZOAN.get_description()]
 
     def get_index(self) -> int:
         """
@@ -50,15 +53,29 @@ class DevilFruitCategory(IntEnum):
 
         return DEVIL_FRUIT_CATEGORY_INDEX_MAP[self]
 
+    def get_max_sum(self) -> int:
+        """
+        Get the maximum sum of the devil fruit category
+        :return: The sum of the devil fruit category
+        """
+
+        return DEVIL_FRUIT_CATEGORY_SUM_MAP[self]
+
 
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_MAP = {
-    DevilFruitCategory.LOGIA: "Logia",
-    DevilFruitCategory.PARAMECIA: "Paramecia",
-    DevilFruitCategory.ZOAN: "Zoan"
+    DevilFruitCategory.ZOAN: "Zoan",
+    DevilFruitCategory.ANCIENT_ZOAN: "Ancient Zoan",
+    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan"
 }
 
 DEVIL_FRUIT_CATEGORY_INDEX_MAP = {
-    DevilFruitCategory.LOGIA: 0,
-    DevilFruitCategory.PARAMECIA: 1,
-    DevilFruitCategory.ZOAN: 2
+    DevilFruitCategory.ZOAN: 0,
+    DevilFruitCategory.ANCIENT_ZOAN: 1,
+    DevilFruitCategory.MYTHICAL_ZOAN: 2
+}
+
+DEVIL_FRUIT_CATEGORY_SUM_MAP = {
+    DevilFruitCategory.ZOAN: Env.DEVIL_FRUIT_CATEGORY_ZOAN_SUM.get_int(),
+    DevilFruitCategory.ANCIENT_ZOAN: Env.DEVIL_FRUIT_CATEGORY_ANCIENT_ZOAN_SUM.get_int(),
+    DevilFruitCategory.MYTHICAL_ZOAN: Env.DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM.get_int()
 }

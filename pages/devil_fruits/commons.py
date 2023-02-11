@@ -24,10 +24,9 @@ def show_add_form(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbi
     _is_editable: bool = is_editable(devil_fruit)
 
     # Category
-    category_index = (DevilFruitCategory(devil_fruit.category).get_index() if devil_fruit is not None
-                      else DevilFruitCategory.ZOAN.get_index())
+    category_index = (DevilFruitCategory(devil_fruit.category).get_index() if devil_fruit is not None else 0)
     st.selectbox("Category", DevilFruitCategory.get_all_description(), key=f"category{key_suffix}",
-                 index=category_index, disabled=True)  # For now only Zoan fruits are allowed
+                 index=category_index, disabled=_is_editable)
 
     # Name
     name_value = devil_fruit.name if devil_fruit is not None else ""
@@ -111,7 +110,7 @@ def validate(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityT
     # Model required for Zoan, not allowed for others
     category: DevilFruitCategory = DevilFruitCategory.get_by_description(get_session_state_key("category", key_suffix))
     model = str(get_session_state_key("model", key_suffix).strip()).capitalize()
-    if category is DevilFruitCategory.ZOAN:
+    if category in [DevilFruitCategory.ZOAN, DevilFruitCategory.ANCIENT_ZOAN, DevilFruitCategory.MYTHICAL_ZOAN]:
         if model == "":
             raise ValidationException("Model required for Zoan type Devil Fruit")
     elif model != "":
@@ -134,20 +133,24 @@ def validate(key_suffix: str, abilities_type_value_dict: dict[DevilFruitAbilityT
             raise ValidationException(f"Ability {ability_type.get_description()} can't be 0")
 
         sum_abilities += get_session_state_key(f'ability{ability_type}', key_suffix)
-        if sum_abilities > Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int():
+        if sum_abilities > category.get_max_sum():
             raise ValidationException(
-                f"Sum of abilities cannot be greater than {Env.DEVIL_FRUIT_ABILITIES_MAX_SUM.get_int()}")
+                f"Sum of abilities cannot be greater than {category.get_max_sum()}")
 
     # Sum of abilities of required value, consider complete and enable status
     is_completed = False
     is_enabled = get_session_state_key("enabled", key_suffix)
 
-    if sum_abilities == Env.DEVIL_FRUIT_ABILITIES_REQUIRED_SUM.get_int():
+    if sum_abilities == category.get_max_sum():
         is_completed = True
     elif is_enabled:
         # Trying to enable before completing - Error
-        raise ValidationException(f"Sum of abilities should be {Env.DEVIL_FRUIT_ABILITIES_REQUIRED_SUM.get_int()}"
+        raise ValidationException(f"Sum of abilities should be {category.get_max_sum()}"
                                   f" before enabling")
+
+    if is_enabled and category is DevilFruitCategory.MYTHICAL_ZOAN:  # Mythical Zoan can't be enabled, only awarded
+        raise ValidationException(
+            f"Devil Fruit of category {category.get_description()} can't be enabled for scheduling")
 
     # Completed, check if already exists a fruit with same abilities
     if len(abilities_type_value_dict) > 0:
