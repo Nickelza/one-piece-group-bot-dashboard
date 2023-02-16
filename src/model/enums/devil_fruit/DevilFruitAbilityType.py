@@ -12,7 +12,7 @@ class DevilFruitAbilityType(IntEnum):
     FIGHT_IMMUNITY_DURATION = 4
     FIGHT_DEFENSE_BOOST = 5
     PREDICTION_WAGER_REFUND = 6
-    GIFT_TAX = 7
+    TAX = 7
 
     def get_description(self) -> str:
         """
@@ -33,7 +33,7 @@ class DevilFruitAbilityType(IntEnum):
                 DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION.get_description(),
                 DevilFruitAbilityType.FIGHT_DEFENSE_BOOST.get_description(),
                 DevilFruitAbilityType.PREDICTION_WAGER_REFUND.get_description(),
-                DevilFruitAbilityType.GIFT_TAX.get_description()]
+                DevilFruitAbilityType.TAX.get_description()]
 
     @staticmethod
     def get_by_description(description: str) -> 'DevilFruitAbilityType':
@@ -56,5 +56,5 @@ DEVIL_FRUIT_ABILITY_TYPE_DESCRIPTION_MAP = {
     DevilFruitAbilityType.FIGHT_IMMUNITY_DURATION: "Fight Immunity Duration",
     DevilFruitAbilityType.FIGHT_DEFENSE_BOOST: "Fight Defense Boost",
     DevilFruitAbilityType.PREDICTION_WAGER_REFUND: "Prediction Wager Refund",
-    DevilFruitAbilityType.GIFT_TAX: "Gift Tax"
+    DevilFruitAbilityType.TAX: "Tax"
 }
