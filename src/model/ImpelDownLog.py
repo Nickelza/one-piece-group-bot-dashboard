@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from peewee import *
 
 from src.model.BaseModel import BaseModel
@@ -11,6 +13,7 @@ class ImpelDownLog(BaseModel):
     id = PrimaryKeyField()
     user = ForeignKeyField(User, backref='impel_down_users', on_delete='CASCADE', on_update='CASCADE')
     sentence_type = CharField(max_length=99, null=True)
+    date_time = DateTimeField(default=datetime.now)
     release_date_time = DateTimeField(null=True)
     is_permanent = BooleanField(default=False)
     bounty_action = CharField(max_length=99, null=True)
@@ -18,6 +21,7 @@ class ImpelDownLog(BaseModel):
     previous_bounty = BigIntegerField(null=True)
     new_bounty = BigIntegerField(null=True)
     message_sent = BooleanField(default=False)
+    is_reversed = BooleanField(default=False)
 
     class Meta:
         db_table = 'impel_down_log'
