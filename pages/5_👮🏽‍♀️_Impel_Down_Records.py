@@ -34,8 +34,9 @@ def main():
             col0 = st.columns(1)[0]
             col_1, col_2 = st.columns(2)
 
-            # Reason
-            col0.info(log.reason)
+            # Reason (if applicable)
+            if log.reason is not None:
+                col0.info(log.reason)
 
             # Date (if applicable)
             if log.date_time is not None:

@@ -150,7 +150,7 @@ def validate(sentence_type: ImpelDownSentenceType, release_date: datetime, relea
         if release_date_time < datetime.now():
             raise ValidationException("Release time cannot be earlier than now")
 
-    # If you should send message sentence and type is not None, reason must be set
-    if should_send_message and sentence_type is not ImpelDownSentenceType.NONE:
+    # If you should send message, reason must be set
+    if should_send_message:
         if reason == "":
-            raise ValidationException("Reason must be set if should send message is checked")
+            raise ValidationException("Reason must be set")
