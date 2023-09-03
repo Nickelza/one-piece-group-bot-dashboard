@@ -18,7 +18,9 @@ def main():
     key_suffix = "_impel_down_logs"
 
     # Filter records by first name, last name, username or user id, sentence reason
-    filter_by = st.text_input(label="Search", key=f"filter_by{key_suffix}")
+    filter_by = st.text_input(
+        label="Search", key=f"filter_by{key_suffix}",
+        help="Search by first name, last name, username, user id, bounty action, sentence reason or type")
 
     # Filter logs limit 10
     if len(filter_by) > 1:

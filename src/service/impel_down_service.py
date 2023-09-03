@@ -5,7 +5,8 @@ from src.model.exceptions.ValidationException import ValidationException
 
 def get_logs_by_string_filter(filter_by: str) -> list[ImpelDownLog]:
     """
-    Gets logs by string filter, searching by first name, last name, username, user id or reason
+    Gets logs by string filter, searching by first name, last name, username, user id, reason, bounty action,
+    sentence type
     :param filter_by: Filter by
     :return: Impel Down Logs
     """
@@ -14,7 +15,9 @@ def get_logs_by_string_filter(filter_by: str) -> list[ImpelDownLog]:
                                                   (ImpelDownLog.user.tg_last_name.contains(filter_by)) |
                                                   (ImpelDownLog.user.tg_username.contains(filter_by)) |
                                                   (ImpelDownLog.user.tg_user_id.contains(filter_by)) |
-                                                  (ImpelDownLog.reason.contains(filter_by))
+                                                  (ImpelDownLog.reason.contains(filter_by)) |
+                                                  (ImpelDownLog.bounty_action.contains(filter_by)) |
+                                                  (ImpelDownLog.sentence_type.contains(filter_by))
                                                   ).order_by(ImpelDownLog.id.desc()).limit(10)
 
 
