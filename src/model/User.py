@@ -15,7 +15,9 @@ class User(BaseModel):
     tg_first_name = CharField(max_length=99)
     tg_last_name = CharField(max_length=99)
     tg_username = CharField(max_length=99)
+    join_date = DateTimeField(default=datetime.datetime.now)
     bounty = BigIntegerField(default=0)
+    total_gained_bounty = BigIntegerField(default=0, constraints=[Check('total_gained_bounty >= 0')])
     pending_bounty = BigIntegerField(default=0)
     doc_q_cooldown_end_date = DateTimeField(null=True)
     game_cooldown_end_date = DateTimeField(null=True)
@@ -33,12 +35,17 @@ class User(BaseModel):
     can_create_crew = BooleanField(default=True)
     can_join_crew = BooleanField(default=True)
     last_message_date = DateTimeField(default=datetime.datetime.now)
+    last_system_interaction_date = DateTimeField(null=True)
     private_screen_list = CharField(max_length=99)
     private_screen_step = SmallIntegerField()
     private_screen_in_edit_id = IntegerField(null=True)
     bounty_gift_tax = IntegerField(default=0)
     is_admin = BooleanField(default=False)
-    can_collect_devil_fruit = BooleanField(default=True)
+    devil_fruit_collection_cooldown_end_date = DateTimeField(null=True)
+    bounty_message_limit = BigIntegerField(default=0)
+    timezone = CharField(max_length=99, null=True)
+    is_active = BooleanField(default=True)
+    prediction_creation_cooldown_end_date = DateTimeField(null=True)
 
     class Meta:
         db_table = 'user'
