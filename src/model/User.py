@@ -67,5 +67,39 @@ class User(BaseModel):
         return ((self.impel_down_release_date is not None and self.impel_down_release_date > datetime.datetime.now())
                 or self.impel_down_is_permanent)
 
+    def get_display_name(self, add_user_id: bool = False) -> str:
+        """
+        Gets the user display name
+        :param add_user_id: Add user id
+        :return: User display name
+        """
+        return "{}{}{}{}".format(self.tg_first_name,
+                                 " " + self.tg_last_name if self.tg_last_name is not None else "",
+                                 " (@" + self.tg_username + ")" if self.tg_username is not None else "",
+                                 " - " + self.tg_user_id if add_user_id else "")
+
+    @staticmethod
+    def get_by_string_filter(filter_by: str) -> list['User']:
+        """
+        Gets users by string filter, searching by first name, last name, username or user id
+        :param filter_by: Filter by
+        :return: Users
+        """
+
+        return User.select().where((User.tg_first_name.contains(filter_by)) |
+                                   (User.tg_last_name.contains(filter_by)) |
+                                   (User.tg_username.contains(filter_by)) |
+                                   (User.tg_user_id.contains(filter_by))
+                                   ).order_by(User.tg_first_name.desc()).limit(10)
+
+    def is_warlord(self) -> bool:
+        """
+        Returns True if the user is a Warlord
+        :return: True if the user is a Warlord
+        """
+        from src.model.Warlord import Warlord
+
+        return self.warlords.where(Warlord.end_date > datetime.datetime.now()).count() > 0
+
 
 User.create_table()

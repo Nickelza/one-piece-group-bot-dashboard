@@ -1,6 +1,7 @@
 import streamlit as st
 
 import resources.Environment as Env
+from pages.commons.util import select_user_select_box, get_selected_user
 from pages.devil_fruits.commons import show_and_get_abilities_multi_select, show_add_form, save
 from src.model.DevilFruit import DevilFruit
 from src.model.DevilFruitAbility import DevilFruitAbility
@@ -9,7 +10,6 @@ from src.model.enums.devil_fruit.DevilFruitAbilityType import DevilFruitAbilityT
 from src.model.enums.devil_fruit.DevilFruitStatus import DevilFruitStatus
 from src.model.tgrest.TgRestDevilFruitAward import TgRestDevilFruitAward
 from src.service.tg_rest_service import send_tg_rest
-from src.service.user_service import get_users_by_string_filter, get_user_display_name
 
 
 def main() -> None:
@@ -64,33 +64,13 @@ def main() -> None:
                 if status in [DevilFruitStatus.COMPLETED, DevilFruitStatus.ENABLED]:
                     st.subheader("Award to user")
 
-                    # Filter input box
-                    filter_user_by = st.text_input(label="Search", key=f"filter_user_by{key_suffix_list}")
-
-                    users: list[User] = []
-                    if len(filter_user_by) > 1:
-                        users: list[User] = get_users_by_string_filter(filter_user_by)
-
-                    # Map users to display name
-                    users_display_name_map: list[tuple[str, User]] = [(
-                        get_user_display_name(user, add_user_id=True), user) for user in users]
-
-                    # Select box with users
-                    display_name_list = [display_name for display_name, _ in users_display_name_map]
-                    selected_user_display_name: str = st.selectbox(
-                        "Select user", display_name_list, key=f"select_user{key_suffix_list}", index=0,
-                        disabled=(len(display_name_list) == 0))
+                    selected_user_display_name, users_display_name_map = select_user_select_box(key_suffix_list)
 
                     # Reason input box
                     reason: str = st.text_input(label="Reason", key=f"reason{key_suffix_list}")
-
                     # Award button
                     if st.button("Award", key=f"award{key_suffix_list}", disabled=(selected_user_display_name is None)):
-                        # Get user from display name
-                        selected_user: User = next(
-                            user for display_name, user in users_display_name_map
-                            if display_name == selected_user_display_name)
-
+                        selected_user: User = get_selected_user(selected_user_display_name, users_display_name_map)
                         # Reason is required
                         if len(reason) == 0:
                             st.error("Reason is required")

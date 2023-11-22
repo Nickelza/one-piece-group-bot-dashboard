@@ -4,7 +4,6 @@ from streamlit_option_menu import option_menu
 import constants as c
 from pages.users.impel_down import main as impel_down_main
 from src.model.User import User
-from src.service.user_service import get_user_display_name, get_users_by_string_filter
 
 
 def main():
@@ -23,12 +22,12 @@ def main():
 
     # Filter users limit 10
     if len(filter_by) > 1:
-        users: list[User] = get_users_by_string_filter(filter_by)
+        users: list[User] = User.get_by_string_filter(filter_by)
     else:
         users: list[User] = User.select().order_by(User.last_message_date.desc()).limit(10)
 
     for index, user in enumerate(users):
-        expander_text = get_user_display_name(user)
+        expander_text = user.get_display_name()
 
         with st.expander(expander_text):
             # Basic information

@@ -120,3 +120,6 @@ DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM = Environment('DEVIL_FRUIT_CATEGORY_MYTHI
 
 # Maximum items displayed in a list. Default: 10
 MAX_ITEMS_DISPLAYED_LIST = Environment('MAX_ITEMS_DISPLAYED_LIST', default_value='5')
+
+# Maximum number of Warlords. Default: 7
+MAX_WARLORDS = Environment('MAX_WARLORDS', default_value='7')
