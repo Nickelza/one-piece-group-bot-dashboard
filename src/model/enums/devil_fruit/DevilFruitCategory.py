@@ -10,6 +10,7 @@ class DevilFruitCategory(IntEnum):
     ZOAN = 3
     ANCIENT_ZOAN = 4
     MYTHICAL_ZOAN = 5
+    SMILE = 6
 
     def get_description(self) -> str:
         """
@@ -43,7 +44,8 @@ class DevilFruitCategory(IntEnum):
         # Excluding Logia and Paramecia
         return [DevilFruitCategory.ZOAN.get_description(),
                 DevilFruitCategory.ANCIENT_ZOAN.get_description(),
-                DevilFruitCategory.MYTHICAL_ZOAN.get_description()]
+                DevilFruitCategory.MYTHICAL_ZOAN.get_description(),
+                DevilFruitCategory.SMILE.get_description()]
 
     def get_index(self) -> int:
         """
@@ -65,17 +67,20 @@ class DevilFruitCategory(IntEnum):
 DEVIL_FRUIT_CATEGORY_DESCRIPTION_MAP = {
     DevilFruitCategory.ZOAN: "Zoan",
     DevilFruitCategory.ANCIENT_ZOAN: "Ancient Zoan",
-    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan"
+    DevilFruitCategory.MYTHICAL_ZOAN: "Mythical Zoan",
+    DevilFruitCategory.SMILE: "SMILE"
 }
 
 DEVIL_FRUIT_CATEGORY_INDEX_MAP = {
     DevilFruitCategory.ZOAN: 0,
     DevilFruitCategory.ANCIENT_ZOAN: 1,
-    DevilFruitCategory.MYTHICAL_ZOAN: 2
+    DevilFruitCategory.MYTHICAL_ZOAN: 2,
+    DevilFruitCategory.SMILE: 3
 }
 
 DEVIL_FRUIT_CATEGORY_SUM_MAP = {
     DevilFruitCategory.ZOAN: Env.DEVIL_FRUIT_CATEGORY_ZOAN_SUM.get_int(),
     DevilFruitCategory.ANCIENT_ZOAN: Env.DEVIL_FRUIT_CATEGORY_ANCIENT_ZOAN_SUM.get_int(),
-    DevilFruitCategory.MYTHICAL_ZOAN: Env.DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM.get_int()
+    DevilFruitCategory.MYTHICAL_ZOAN: Env.DEVIL_FRUIT_CATEGORY_MYTHICAL_ZOAN_SUM.get_int(),
+    DevilFruitCategory.SMILE: Env.DEVIL_FRUIT_CATEGORY_ZOAN_SUM.get_int()
 }
