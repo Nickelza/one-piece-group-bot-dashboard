@@ -12,7 +12,7 @@ class TgRestImpelDownNotification(TgRest):
     """
 
     def __init__(self, user_id: int, sentence_type: ImpelDownSentenceType, release_date_time: datetime,
-                 bounty_action: ImpelDownBountyAction, reason: str):
+                 bounty_action: ImpelDownBountyAction, reason: str, log_id: int):
         """
         Constructor
 
@@ -21,6 +21,7 @@ class TgRestImpelDownNotification(TgRest):
         :param release_date_time: The release date time
         :param bounty_action: The bounty action
         :param reason: The reason
+        :param log_id: The log id
         """
 
         super().__init__(TgRestObjectType.IMPEL_DOWN_NOTIFICATION)
@@ -30,3 +31,4 @@ class TgRestImpelDownNotification(TgRest):
         self.release_date_time: datetime = release_date_time
         self.bounty_action: ImpelDownBountyAction = bounty_action
         self.reason: str = reason
+        self.log_id: int = log_id

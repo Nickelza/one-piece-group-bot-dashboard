@@ -122,7 +122,8 @@ def save(user: User, sentence_type: ImpelDownSentenceType, bounty_action: ImpelD
                 release_date_time = datetime.combine(release_date, release_time)
             else:
                 release_date_time = None
-            notification = TgRestImpelDownNotification(user.id, sentence_type, release_date_time, bounty_action, reason)
+            notification = TgRestImpelDownNotification(
+                user.id, sentence_type, release_date_time, bounty_action, reason, impel_down_log.id)
             send_tg_rest(notification)
             impel_down_log.message_sent = True
 
